@@ -1,0 +1,37 @@
+
+/* TwoButtonsPage.css */
+
+.button-container {
+    display: flex; /* Use flexbox to position buttons side by side */
+    flex-wrap: wrap; /* Allow buttons to wrap onto multiple lines */
+    justify-content: center; /* Space buttons evenly within the container */
+    /*justify-content: space-around; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100vh; /* Use the full height of the viewport */
+  }
+  
+  .large-button {
+    flex: 1; /* Distribute available space equally among buttons */
+    padding: 80px 40px; /* Adjust padding to make the buttons larger */
+    margin: 0 10px; /* Add margin to create space between buttons */
+    font-size: 30px; /* Adjust font size for larger text */
+    background-color: #0074cc; /* Customize the background color */
+    color: #ffffff; /* Customize the text color */
+    border: none; /* Remove borders */
+    border-radius: 8px; /* Add rounded corners */
+    cursor: pointer; /* Add a pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Add a smooth transition on background color change */
+    white-space: nowrap; /* Prevent text from wrapping */
+    text-decoration: none; /*Remove underline*/
+    text-align: center;
+  
+
+  
+  
+  
+    /* Optional: Add hover effect */
+    &:hover {
+      background-color: #0058a6; /* Change background color on hover */
+    }
+  }
+  

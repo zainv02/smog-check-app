@@ -1,24 +1,19 @@
 import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import TwoButtonsPage from './components/TwoButtonsPage/TwoButtonsPage.jsx';
+import NewUser from './components/NewUser/NewUser';
+import ReturningUser from './components/ReturningUser/ReturningUser';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/user-info" element={<NewUser />} />
+        <Route path="/" element={<TwoButtonsPage />} />
+        <Route path="/returning-user" element={<ReturningUser />} />
+      </Routes>
+    </Router>
   );
 }
 
