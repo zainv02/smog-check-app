@@ -1,0 +1,36 @@
+Customer comes in
+	first they enter their license plate. will be used to check if in database or not
+
+	they enter their license plate number, name, phone number, email address, address(optional)
+	if they are a new customer (license plate is not found in database):
+		app does an api call to fill in the rest of their information with VIN lookup
+		they are sent to a page asking them to either confirm their information or unconfirm it
+		if they unconfirm it:
+			they are able to edit the text fields that have been filled in with their own information by tapping the fields
+			they can then click submit
+			they can then click confirm
+			
+		
+		a new entry will be created with the information in database. (new customer, new vehicle, new order)
+		
+	if they are actually a returning customer (license plate number and phone/email/name already exists):
+		a page will show saying that they already have the customer on file. they will show the license plate and owner and ask user to confirm it is them
+		if they confirm:
+			app will ask if they want to update whatever fields are different
+		if they do not confirm:
+			a new entry will be created with the information in database. (new customer, new vehicle, new order)
+			
+	the app calculates how much the servicing will cost by using the date of the car and whatever deals we are having etc
+	the app makes an invoice using an invoice template and sends it to the customer via email
+
+
+Plan v2:
+
+License plate number is all that needs to be entered. No new and returning. This will do API call.
+If license plate is in database, populate user information too. Ask user to verify and let them change user information. 
+If license plate isn't in database, make them populate it. They shouldn't be allowed to edit the car stuff.
+Email and phone and phone should be mandatory.
+Ask how they heard about us (drop down for yelp, google, etc)
+
+Calculate pricing based on car year. Tell them pricing and explanation for why. 
+
