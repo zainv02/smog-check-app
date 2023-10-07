@@ -4,7 +4,9 @@
   "description": "backend for smog registration application",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-db": "bash scripts/start-db.sh",
+    "stop-db": "bash scripts/stop-db.sh"
   },
   "author": "Zain Vanjara",
   "license": "ISC",
