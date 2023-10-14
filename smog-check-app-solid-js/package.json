@@ -1,7 +1,7 @@
 {
-  "name": "vite-template-solid",
+  "name": "smog-check-app-solid-js",
   "version": "0.0.0",
-  "description": "",
+  "description": "Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.",
   "scripts": {
     "start": "vite",
     "dev": "vite",
@@ -18,7 +18,7 @@
     "postcss": "^8.4.30",
     "solid-devtools": "^0.27.3",
     "tailwindcss": "^3.3.2",
-    "typescript": "^5.1.3",
+    "typescript": "^5.2.2",
     "vite": "^4.3.9",
     "vite-plugin-solid": "^2.7.0",
     "vite-tsconfig-paths": "^4.2.1"
@@ -26,5 +26,7 @@
   "dependencies": {
     "@solidjs/router": "^0.8.3",
     "solid-js": "^1.7.6"
-  }
+  },
+  "main": ".eslintrc.js",
+  "author": ""
 }

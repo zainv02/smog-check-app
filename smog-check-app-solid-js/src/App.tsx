@@ -1,8 +1,7 @@
 import type { Component } from 'solid-js';
 import { Router, Route, Routes } from '@solidjs/router';
 import LicensePlateEnter from './views/LicensePlateEnter/LicensePlateEnter';
-import NewUser from './views/NewUser/NewUser';
-import ReturningUser from './views/ReturningUser/ReturningUser';
+import UserInfo from './views/UserInfo/UserInfo';
 
 const App: Component = () => {
 
@@ -10,9 +9,8 @@ const App: Component = () => {
         <>
             <Router>
                 <Routes>
-                    <Route path='/' component={LicensePlateEnter}/>
-                    <Route path='/new-user' component={NewUser}/>
-                    <Route path='/returning-user' component={ReturningUser}/>
+                    <Route path='/plate-info' component={LicensePlateEnter}/>
+                    <Route path='/user-info' component={UserInfo}/>
                 </Routes>
             </Router>
         </>

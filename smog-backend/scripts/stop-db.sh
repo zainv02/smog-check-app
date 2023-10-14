@@ -13,14 +13,33 @@ timeout 10 bash -c 'until printf "" 2>>/dev/null >>/dev/tcp/$0/$1; do sleep 1; d
 # https://stackoverflow.com/questions/46516584/docker-check-if-postgres-is-ready
 timeout 10 bash -c 'until docker exec $0 pg_isready; do sleep 1; done' ${POSTGRES_CONTAINER_NAME}
 
+read -r -p "### do you want to dump the database to a file? [y/N]: " x
 
-var_db="${POSTGRES_DB_NAME:-${POSTGRES_USER}}"
-var_dump="databases/dump.sql"
+x=${x,,} # convert x to lowercase
 
-echo -e "\n### dumping database [${var_db}] to [${var_dump}] \n"
+if [[ "$x" =~ ^(yes|y)$ ]]; then
 
-echo -e "docker exec -i \"${POSTGRES_CONTAINER_NAME}\" pg_dump -U \"${POSTGRES_USER}\" \"${var_db}\" > ${var_dump}"
-docker exec -i "${POSTGRES_CONTAINER_NAME}" pg_dump -U "${POSTGRES_USER}" "${var_db}" > ${var_dump}
+    var_db="${POSTGRES_DB_NAME:-${POSTGRES_USER}}"
+    var_dump="databases/dump.sql"
+
+    read -r -p "### please enter the path to the dump (or enter nothing for default dump at \"${var_dump}\"):\n" y
+
+    if [ ! -z "${y}" ]; then
+
+        var_db="${y}"
+
+    fi
+
+    echo -e "\n### dumping database [${var_db}] to [${var_dump}] \n"
+
+    echo -e "docker exec -i \"${POSTGRES_CONTAINER_NAME}\" pg_dump -U \"${POSTGRES_USER}\" \"${var_db}\" > ${var_dump}"
+    docker exec -i "${POSTGRES_CONTAINER_NAME}" pg_dump -U "${POSTGRES_USER}" "${var_db}" > ${var_dump}
+
+else
+
+    echo -e "\n### not dumping database \n"
+
+fi
 
 echo -e "\n### stopping docker services \n"
 

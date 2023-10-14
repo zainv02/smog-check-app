@@ -1,12 +1,12 @@
 module.exports = {
     'env': {
-        'browser': true,
+        'browser': false,
+        'node': true,
         'es2021': true
     },
     'extends': [
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
-        'plugin:solid/typescript'
     ],
     'overrides': [
         {
@@ -28,8 +28,6 @@ module.exports = {
     },
     'plugins': [
         '@typescript-eslint',
-        // solid
-        'solid'
     ],
     'rules': {
         // force quotes to be single quotes '
@@ -59,12 +57,8 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': [
             'error',
             {
-                'argsIgnorePattern': '^_',
-                'varsIgnorePattern': '^_',
+                'argsIgnorePattern': '^_'
             }
-        ],
-
-        // jsx
-        'jsx-quotes': [ 'error', 'prefer-single' ]
+        ]
     }
 };

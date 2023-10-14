@@ -57,10 +57,11 @@ To stop the container and remove it:
 ### Connecting to the database
 You can use `psql` to connect to the database. The address is the host machine address + the mapped container port.
 `psql -h localhost -p 8080 -U postgres`
-- `-h localhost` is the ip address
+- `-h localhost` is the ip address/host
 - `-p 8080` is the opened port
 - `-U postgres` is the user to connect as, postgres being the default
-Upon connecting, it will prompt you to enter a password, which you set when using `docker run`
+Upon connecting, it will prompt you to enter a password, which you set when using `docker run`.
+If prompted for a user password, enter the POSTGRESS_PASSWORD.
 
 ### Accessing the container terminal
 `docker exec -it <container-name> bash`
@@ -73,6 +74,14 @@ Upon connecting, it will prompt you to enter a password, which you set when usin
 [Ref](https://davejansen.com/how-to-dump-and-restore-a-postgresql-database-from-a-docker-container/)
 `docker exec -i <container-name> bash -c "POSTGRES_PASSWORD="123" psql --username postgres <db-name>" < /path/dump.sql`
 
+### Querying from the terminal using psql
+`docker exec -i <container-name> psql -U postgres <db-name> -c "<query>"`
+- ex: `docker exec -i postgres-db psql -U postgres smogdb -c "\dt"`
+- ex: `docker exec -i postgres-db psql -U postgres smogdb -c 'SELECT * FROM "Automobile" WHERE true LIMIT 1'`
+OR use psql directly and connect to the database `psql -h <address> -p <port> -U postgres `
+- ex: `psql -h localhost -p 8080 -U postgres -c 'SELECT * FROM "Automobile" WHERE true LIMIT 3'`
+OR if you want to include password in the command, connect using the URL `psql postgresql://<username>:<password>@<address>:<port>/<db-name> -c '...'`
+- ex: `psql postgresql://postgres:123@localhost:8080/smogdb -c 'SELECT * FROM "Automobile" WHERE true LIMIT 3'`
 
 ## Docker volume management
 In `compose.yaml`, if no volume settings are configured, a default local volume will be created at each run, which takes up space quickly.
