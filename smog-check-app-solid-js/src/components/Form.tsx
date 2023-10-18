@@ -1,7 +1,19 @@
-import { ParentComponent, For } from 'solid-js';
-import { Component, JSX, createEffect, createSignal } from 'solid-js';
+import { ParentComponent, For , Component, JSX, createSignal, createEffect } from 'solid-js';
+import { twMerge } from 'tailwind-merge';
 
-type FormInputType = 'text' | 'email' | 'checkbox';
+
+export const Form: ParentComponent<{[key in keyof Omit<JSX.HTMLElementTags['form'], 'class'>]: JSX.HTMLElementTags['form'][key]}> = (props) => {
+
+    return (
+        <form class='flex flex-col items-center [&>*]:mt-4 [&>*]:w-full' {...props}>
+            {props.children}
+        </form>
+    );
+
+};
+
+
+type InputFieldType = 'text' | 'email' | 'number' | 'password' | 'url' | 'tel' | 'date' | 'datetime-local';
 
 type InputValidatorFunctionResult = boolean | { valid: boolean, message: string };
 type InputValidatorFunction = (value: JSX.InputHTMLAttributes<HTMLInputElement>['value']) => InputValidatorFunctionResult;
@@ -9,7 +21,7 @@ type InputValidator = InputValidatorFunction;
 
 type FieldProps<TElement extends HTMLElement, TAttributes extends JSX.HTMLAttributes<TElement> = JSX.HTMLAttributes<TElement>> = {
     name: string,
-    label: string,
+    label?: string,
     attr?: {[key in keyof TAttributes]: TAttributes[key]},
     errorVisible?: boolean,
     errorMessage?: string
@@ -28,14 +40,19 @@ export const Field: ParentComponent<FieldProps<HTMLElement>> = (props) => {
     
     });
 
+    // const labelWidthPart = 2;
+    // const inputWidthPart = 3;
+    // const labelWidthPercent = labelWidthPart / inputWidthPart;
+    // const inputWidthPercent = 1 - labelWidthPercent;
+
     return (
-        <div class='field w-full'>
-            <label for={props.name} class='w-1/2'>{props.label}</label>
-            <div class='flex flex-col items-end justify-start w-1/2'>
-                <div class='w-full'>
+        <div class='flex w-full flex-row items-start justify-between'>
+            {props.label && <label for={props.name} class='mr-2 h-8 w-[40%] max-w-[40%]'>{props.label}</label>}
+            <div class={twMerge('flex flex-col items-end justify-start', props.label ? 'w-[60%] max-w-[60%]' : 'w-full max-w-full')}>
+                <div class='h-8 w-full'>
                     {props.children}
                 </div>
-                <p class='error w-full' style={{ display: errorVisible() ? 'block' : 'none' }}>{errorMessage()}</p>
+                <p class='w-full text-sm text-red-500' style={{ display: errorVisible() ? 'block' : 'none' }}>{errorMessage()}</p>
             </div>
         </div>
     );
@@ -78,7 +95,7 @@ function setNativeValue(element: HTMLElement, value: unknown) {
 
 type InputFieldProps = FieldProps<HTMLInputElement, JSX.InputHTMLAttributes<HTMLInputElement>> & {
     
-    type?: FormInputType,
+    type?: InputFieldType,
 
     inputTransformer?: (char: string) => string | boolean,
 
@@ -121,7 +138,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
 
     const handleCheckValidity = async () => {
 
-        console.log('checking validity', inputElement.value);
+        // console.log('checking validity', inputElement.value);
         inputElement.setCustomValidity('');
 
         // check default input validity first from validation attributes
@@ -152,7 +169,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
         
         }        
 
-        console.log('isValid?', valid);
+        // console.log('isValid?', valid);
 
         if (!valid) {
 
@@ -190,17 +207,24 @@ export const InputField: Component<InputFieldProps> = (props) => {
 
         if (inputTransformer && !(e.inputType in defaultBehaviourInputTypes)) {       
 
-            const attemptedInput = pastedData.length > 0 ? pastedData : e.data;
+            const attemptedInput = pastedData.length > 0 ? pastedData : e.data || target.value;
 
             let transformedInput = '';
 
             for (let i = 0; i < attemptedInput.length; i++) {
 
                 const result = inputTransformer(attemptedInput[ i ]);
-                if (typeof result === 'boolean' && result) {
 
-                    transformedInput += attemptedInput[ i ];
-                    continue;   
+                if (typeof result === 'boolean') {
+
+                    if (result) {
+
+                        transformedInput += attemptedInput[ i ];
+                        continue;
+
+                    }
+
+                    continue;
                 
                 }
 
@@ -208,22 +232,18 @@ export const InputField: Component<InputFieldProps> = (props) => {
                 transformedInput += result;
             
             }
+            
 
             const insertCount = prevValue.length + transformedInput.length > target.maxLength ? target.maxLength - prevValue.length : transformedInput.length;
 
             const insertResult = transformedInput.slice(0, insertCount);
-
             
 
-            if (insertCount > 0) {
+            const value = prevValue.slice(0, prevStart) + insertResult + prevValue.slice(prevEnd);
 
-                const value = prevValue.slice(0, prevStart) + insertResult + prevValue.slice(prevEnd);
+            setNativeValue(target, value);
 
-                setNativeValue(target, value);
-
-                target.selectionStart = target.selectionEnd = prevStart + insertCount;
-            
-            }
+            target.selectionStart = target.selectionEnd = prevStart + insertCount;
 
         }
         
@@ -251,14 +271,17 @@ export const InputField: Component<InputFieldProps> = (props) => {
                 ref={inputElement} 
                 type={props.type || 'text'} 
                 name={props.name} 
-                id={props.name} 
+                id={props.name}
                 onInput={(e) => {
 
+                    // console.log('input event', e);
                     handleInput(e);
 
                 }}
+
                 onPaste={(e) => {
 
+                    // console.log('paste event', e);
                     pastedData = e.clipboardData.getData('text');
                 
                 }}
@@ -271,7 +294,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
                 }}
 
                 {...props.attr} 
-                class={`${props.type !== 'checkbox' ? 'w-full' : 'w-8'}`} 
+                class={'h-full w-full rounded px-2 py-1 outline outline-1 invalid:outline invalid:outline-2 invalid:outline-red-500'} 
             />
         </Field>
     );
@@ -295,9 +318,9 @@ export const SelectField: Component<SelectFieldProps> = (props) => {
                 name={props.name} 
                 id={props.name} 
                 {...props.attr}
-                class={'w-full'} 
+                class={'h-full w-full rounded px-2 py-1 outline outline-1 invalid:outline invalid:outline-2 invalid:outline-red-500'}
             >
-                {props.emptyOption ? <option disabled selected>{props.emptyOptionText || 'Select'}</option> : <></>}
+                {props.emptyOption ? <option disabled selected value=''>{props.emptyOptionText || 'Select'}</option> : <></>}
                 <For each={props.options}>{([ value, name ]) => <option value={value}>{name}</option>}</For>
             </select>
         </Field>

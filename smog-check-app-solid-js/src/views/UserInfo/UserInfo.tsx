@@ -1,16 +1,33 @@
-import { Field, InputField } from '$components/Form';
-import { A } from '@solidjs/router';
 import { Component, JSX } from 'solid-js';
 
+import { LinkButton, SubmitButton, ButtonStyles } from '$components/Button';
+import { Form, InputField } from '$components/Form';
+import { Title } from '$components/Header';
+import { Section, Panel, Columns } from '$components/Layout';
+import { getFormFields } from '$src/utils/formUtils';
+
+/**
+ * name     date
+ * address  phone
+ * city zip?
+ * source
+ * 
+ * and also show car info (uneditable)
+ * 
+ * lastly:
+ * signature   $estimate
+ * 
+ * @returns 
+ */
 const UserInfo: Component = () => {
 
     const handleSubmit: JSX.HTMLElementTags['form']['onSubmit'] = (e) => {
 
         e.preventDefault();
 
-        const formData = new FormData(e.currentTarget);
+        const fields = getFormFields(e.currentTarget);
 
-        for (const [ name, value ] of formData) {
+        for (const [ name, value ] of Object.entries(fields)) {
 
             console.log(name, ':', value);
         
@@ -20,25 +37,29 @@ const UserInfo: Component = () => {
     
 
     return <>
-        <section class='section h-screen'>
-            <div class='panel mt-16'>
-                <h2 class='title'>User Information</h2>
+        <Section>
+            <Panel>
+                <Title>Customer Info</Title>
             
-                <form class='form w-full' onSubmit={handleSubmit} >
-                
-                    <InputField name='plate' label='License Plate:' type='text' attr={{ required: true }} />
-                    <InputField name='state' label='State:' type='text' attr={{ required: true }} />
-                    <InputField name='name' label='Name:' type='text' attr={{ required: true }} />
+                <Form onSubmit={handleSubmit}>
+                    <Columns>
+                        <InputField name='name' label='Name:' type='text' attr={{ required: true }} />
+                        <InputField name='date' label='Date:' type='date' attr={{ required: true }} />
+                    </Columns>
+                    <Columns>
+                        <InputField name='address' label='Address:' type='text' attr={{ required: true }} />
+                        <InputField name='phone' label='Phone:' type='tel' attr={{ required: true }} />
+                    </Columns>
+                    <InputField name='city' label='City:' type='text' attr={{ required: true }} />
+                    <InputField name='source' label='Source:' type='text' attr={{ required: true }} />
 
-                    <div class='buttons'>
-                        <A href='/' class='button'>Back</A>
-                        <input type='submit' class='button primary'>Submit</input>
+                    <div class='flex flex-row items-center justify-between'>
+                        <LinkButton href='/license-info'>Back</LinkButton>
+                        <SubmitButton buttonStyle={ButtonStyles.PRIMARY}>Confirm</SubmitButton>
                     </div>
-                
-                </form>
-            </div>
-
-        </section>
+                </Form>
+            </Panel>
+        </Section>
     </>;
 
 };

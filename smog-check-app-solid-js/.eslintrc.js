@@ -1,3 +1,11 @@
+/**
+ * Various notes:
+ * eslint rule priorities
+ * https://github.com/eslint/eslint/discussions/15704
+ * 
+ * 
+ */
+
 module.exports = {
     'env': {
         'browser': true,
@@ -6,7 +14,14 @@ module.exports = {
     'extends': [
         'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
-        'plugin:solid/typescript'
+        // eslint-plugin-import https://github.com/import-js/eslint-plugin-import/tree/main
+        // 'plugin:import/recommended', // this doesn't seem to be able to resolve internals
+        // eslint-import-resolver-typescript
+        'plugin:import/typescript',
+        // eslint-plugin-tailwindcss
+        'plugin:tailwindcss/recommended',
+        // solid
+        'plugin:solid/typescript',
     ],
     'overrides': [
         {
@@ -28,6 +43,8 @@ module.exports = {
     },
     'plugins': [
         '@typescript-eslint',
+        // eslint-plugin-import
+        'import',
         // solid
         'solid'
     ],
@@ -65,6 +82,36 @@ module.exports = {
         ],
 
         // jsx
-        'jsx-quotes': [ 'error', 'prefer-single' ]
+        'jsx-quotes': [ 'error', 'prefer-single' ],
+
+        // eslint-plugin-import
+        // 'import/extensions': [ 'error', 'never' ], // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/extensions.md
+        'import/order': [ 
+            'error', 
+            { 
+                // 'groups': [ 
+                //     'builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type' 
+                // ],
+                'alphabetize': {
+                    'order': 'asc', /* sort in ascending order. Options: ['ignore', 'asc', 'desc'] */
+                    'caseInsensitive': true /* ignore case. Options: [true, false] */
+                },
+                'pathGroupsExcludedImportTypes': [],
+                'newlines-between': 'always' 
+            }
+        ]
+    },
+
+    // https://github.com/import-js/eslint-import-resolver-typescript
+    'settings': {
+        'import/parsers': {
+            '@typescript-eslint/parser': [ '.ts', '.tsx' ]
+        },
+        'import/resolver': {
+            'typescript': {
+                'alwaysTryTypes': true, // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
+            },
+            // 'node': true
+        }
     }
 };
