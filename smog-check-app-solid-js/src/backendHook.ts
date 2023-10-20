@@ -1,62 +1,69 @@
-const backendURL = 'http://127.0.0.1:4000';
+import axios from 'axios';
 
-class BackendAPI
-{
+const backendURL = 'http://localhost:4000/';
 
-    async getUserInfo(licensePlate) {
+function createServerUrl(path: string) {
 
-        try {
+    if (!path || path.length === 0) {
 
-            const response = await fetch(backendURL + '/user?plate=' + licensePlate);
-      
-            if (!response.ok) {
-
-                console.log('Testing getuser info');
-                throw new Error('Network response failed');
-            
-            }
-      
-            const data = await response.json(); // Parse the JSON response
-            console.log(data); // Log the parsed data
-      
-            return data; // Return the parsed data
-        
-        } catch (error) {
-
-            console.error('Error:', error);
-            return {}; // Return an empty object or handle the error as needed
-        
-        }
+        return '/';
     
     }
 
-    async getCarInfo(licensePlate) {
+    if (path[ 0 ] !== '/') {
 
-        try {
-
-            const response = await fetch(backendURL + '/car?plate=' + licensePlate);
-      
-            if (!response.ok) {
-
-                console.log('Testing getuser info');
-                throw new Error('Network response failed');
-            
-            }
-      
-            const data = await response.json(); // Parse the JSON response
-            console.log(data); // Log the parsed data
-      
-            return data; // Return the parsed data
-        
-        } catch (error) {
-
-            console.error('Error:', error);
-            return {}; // Return an empty object or handle the error as needed
-        
-        }
+        path = '/' + path;
     
     }
+
+    const url = new URL(backendURL);
+
+    url.pathname = 'api-v1' + path;
+
+    return url.toString();
 
 }
 
-export default BackendAPI;
+interface UserInfoParams {
+    plate: string,
+    state: string
+}
+
+export async function getUserInfo(params: UserInfoParams) {
+
+    if (!params) {
+
+        console.warn('getUserInfo needs params!');
+        return;
+    
+    }
+
+    try {
+
+        const response = await axios.post(createServerUrl('/user-info'), {
+            plate: params.plate,
+            state: params.state
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        // console.log('getUserInfo response', response);
+
+        if (response.status !== 200) {
+
+            throw new Error('bad status');
+        
+        }
+
+        return response.data;
+    
+    } catch (error) {
+        
+        console.error('getUserInfo error', error);
+
+    }
+
+}

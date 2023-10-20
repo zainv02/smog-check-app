@@ -24,7 +24,7 @@ export async function getVinData(plate: string, state: string) {
         data: body
     });
 
-    console.log(result.data);
+    // console.log(result.data);
 
     if (result.data[ 'success' ]) {
 
@@ -59,7 +59,7 @@ export async function getVehicleData(vin: string) {
         data: body
     });
 
-    console.log(result.data);
+    // console.log(result.data);
 
     if (result.data[ 'success' ]) {
 

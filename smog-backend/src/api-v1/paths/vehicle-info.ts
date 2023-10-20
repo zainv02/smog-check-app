@@ -101,18 +101,18 @@ POST.apiDoc = {
                     schema: {
                         $ref: '#/components/schemas/VehicleInfo'
                     },
-                    examples: {
-                        MyCar: {
-                            value: {
-                                'vin':'JF1GE7E68AH505850',
-                                'year':'2010',
-                                'make':'Subaru',
-                                'model':'Impreza',
-                                'plate':'6LEE230',
-                                'mileage':21
-                            }
-                        }
-                    }
+                    // examples: {
+                    //     MyCar: {
+                    //         value: {
+                    //             'vin':'JF1GE7E68AH505850',
+                    //             'year':'2010',
+                    //             'make':'Subaru',
+                    //             'model':'Impreza',
+                    //             'plate':'6LEE230',
+                    //             'mileage':21
+                    //         }
+                    //     }
+                    // }
                 }
             }
             

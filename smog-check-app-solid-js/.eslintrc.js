@@ -87,7 +87,7 @@ module.exports = {
         // eslint-plugin-import
         // 'import/extensions': [ 'error', 'never' ], // https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/extensions.md
         'import/order': [ 
-            'error', 
+            'warn', 
             { 
                 // 'groups': [ 
                 //     'builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type' 

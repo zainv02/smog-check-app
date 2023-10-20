@@ -1,18 +1,24 @@
+import { useNavigate } from '@solidjs/router';
 import { Component } from 'solid-js';
 
-import { ButtonStyles, LinkButton } from '$components/Button';
+import { ButtonStyles, Button } from '$components/Button';
 import { Title } from '$components/Header';
 import { Panel, Section } from '$components/Layout';
 
 
 const Home: Component = () => {
 
+    const navigate = useNavigate();
 
     return (
         <Section>
             <Panel>
                 <Title>Start Here</Title>
-                <LinkButton href='/plate-info' buttonStyle={ButtonStyles.PRIMARY} class='px-8 py-4 text-4xl'>Start</LinkButton>
+                <Button buttonStyle={ButtonStyles.PRIMARY} class='px-8 py-4 text-4xl' onClick={() => {
+
+                    navigate('/plate-info');
+
+                }}>Start</Button>
             </Panel>
         </Section>
     );

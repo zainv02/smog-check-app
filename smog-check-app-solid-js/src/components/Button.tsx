@@ -1,5 +1,5 @@
-import { A } from '@solidjs/router';
-import { ParentComponent, JSX } from 'solid-js';
+import { A, AnchorProps } from '@solidjs/router';
+import { ParentComponent, JSX, createSignal, createEffect } from 'solid-js';
 import { twMerge } from 'tailwind-merge';
 
 const parseVariants = (code: string) => {
@@ -59,7 +59,7 @@ interface ButtonProps {
     class?: string
 }
 
-const buttonStyle = 'rounded bg-slate-100 px-4 py-2 text-slate-700 shadow-md transition-all duration-100 active:bg-slate-700 active:text-slate-100';
+const buttonStyle = 'rounded bg-slate-100 px-4 py-2 text-slate-700 shadow-md transition-all duration-100 active:enabled:bg-slate-700 active:enabled:text-slate-100 disabled:opacity-50';
 
 const createButtonStyle: (opts?: ButtonProps) => string = (opts = {}) => {
 
@@ -69,18 +69,41 @@ const createButtonStyle: (opts?: ButtonProps) => string = (opts = {}) => {
 
 export const Button: ParentComponent<ButtonProps & {[key in keyof Omit<JSX.ButtonHTMLAttributes<HTMLButtonElement>, 'class'>]: JSX.ButtonHTMLAttributes<HTMLButtonElement>[key]}> = (props) => {
 
+    const [ spreadProps, setSpreadProps ] = createSignal({});
+
+    createEffect(() => {
+
+        // eslint-disable-next-line solid/reactivity
+        const { class: _, ...otherProps } = props;
+        setSpreadProps(otherProps);
+    
+    });
+
+    
+
     return (
-        <button class={createButtonStyle(props)} {...props} >
+        <button class={createButtonStyle(props)} { ...spreadProps() } >
             {props.children}
         </button>
     );
 
 };
 
-export const LinkButton: ParentComponent<{href: string} & ButtonProps> = (props) => {
+export const LinkButton: ParentComponent<{href: string, disabled?: boolean, style?: JSX.CSSProperties | string} & ButtonProps & {[key in keyof Omit<AnchorProps, 'class' | 'style'>]: AnchorProps[key]}> = (props) => {
+
+    const [ spreadProps, setSpreadProps ] = createSignal({});
+
+    createEffect(() => {
+
+        // eslint-disable-next-line solid/reactivity
+        const { class: _class, style: _style, ...otherProps } = props;
+        setSpreadProps(otherProps);
+    
+    });
+
 
     return (
-        <A href={props.href} class={createButtonStyle(props)}>
+        <A href={props.href} class={twMerge(createButtonStyle(props), props.disabled && 'opacity-50')} style={{ 'pointer-events': props.disabled ? 'none' : 'all' }} {...spreadProps()}>
             {props.children}
         </A>
     );
@@ -89,8 +112,18 @@ export const LinkButton: ParentComponent<{href: string} & ButtonProps> = (props)
 
 export const SubmitButton: ParentComponent<ButtonProps & {[key in keyof Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'class' | 'type'>]: JSX.InputHTMLAttributes<HTMLInputElement>[key]}> = (props) => {
 
+    const [ spreadProps, setSpreadProps ] = createSignal({});
+
+    createEffect(() => {
+
+        // eslint-disable-next-line solid/reactivity
+        const { class: _class, ...otherProps } = props;
+        setSpreadProps(otherProps);
+    
+    });
+
     return (
-        <input type='submit' class={createButtonStyle(props)} {...props}>
+        <input type='submit' class={createButtonStyle(props)} {...spreadProps()}>
             {props.children}
         </input>
     );

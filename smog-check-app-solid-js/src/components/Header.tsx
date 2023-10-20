@@ -9,3 +9,11 @@ export const Title: ParentComponent = (props) => {
     );
 
 };
+
+export const Subtitle: ParentComponent = (props) => {
+
+    return (
+        <h1 class='mb-4 mt-2 text-center text-2xl font-semibold'>{props.children}</h1>
+    );
+
+};

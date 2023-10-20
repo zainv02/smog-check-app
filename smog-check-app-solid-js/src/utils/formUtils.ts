@@ -1,15 +1,15 @@
 import { JSX } from 'solid-js';
 
 
-type FieldValue = JSX.InputHTMLAttributes<HTMLInputElement>['value'] | JSX.SelectHTMLAttributes<HTMLSelectElement>['value'];
+type FieldValue = JSX.HTMLElementTags['input']['value'] | JSX.HTMLElementTags['select']['value'];
 
-type FieldsObject = {[key: string]: FieldValue};
+type FieldsRecord = {[key: string]: FieldValue};
 
-type FormFieldsObjectGetter = (form: HTMLFormElement) => FieldsObject;
+type FormFieldsObjectGetter = (form: HTMLFormElement) => FieldsRecord;
 
 export const getFormFields: FormFieldsObjectGetter = ((form) => {
 
-    const fields: FieldsObject = {};
+    const fields: FieldsRecord = {};
 
     const inputs = form.querySelectorAll('input, select') as unknown as (HTMLInputElement | HTMLSelectElement)[];
 

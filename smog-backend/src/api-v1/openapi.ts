@@ -45,7 +45,44 @@ const apiDoc: OpenAPIV3.Document = {
                     'plate',
                     'mileage' 
                 ],
-                additionalProperties: false
+                additionalProperties: false,
+                example: {
+                    'vin':'JF1GE7E68AH505850',
+                    'year':'2010',
+                    'make':'Subaru',
+                    'model':'Impreza',
+                    'plate':'6LEE230',
+                    'mileage':21
+                }
+            },
+            UserInfo: {
+                type: 'object',
+                properties: {
+                    name: {
+                        type: 'string'
+                    },
+                    address: {
+                        type: 'string'
+                    },
+                    city: {
+                        type: 'string'
+                    },
+                    phone: {
+                        type: 'string'
+                    },
+                    source: {
+                        type: 'string'
+                    },
+                },
+                additionalProperties: false,
+                example: {
+                    // 'id': 'JO1231',
+                    'name':'John',
+                    'address':'1234 Cool Street',
+                    'city':'San Limon',
+                    'phone':'1234567890',
+                    'source':'Source',
+                }
             }
         }
     },
