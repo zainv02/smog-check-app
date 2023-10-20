@@ -1,5 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { jsPDF } = require('jspdf');
-const path = require('node:path');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+// const path = require('node:path');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('node:fs');
 
 function createInvoice(data) {
@@ -33,6 +36,12 @@ function createInvoice(data) {
     const textSize = 16;
     const gap = 10;
 
+    /**
+     * 
+     * @param {*} x 
+     * @param {*} y 
+     * @returns {[number, number]}
+     */
     function paddedPos(x, y) {
 
         return [ pagePadding + x, pagePadding + y ];
@@ -53,6 +62,8 @@ function createInvoice(data) {
     const cellPaddingY = 5;
     const cellHeight = cellLabelSize + cellValueSize + cellPaddingY * 2;
     function createCell(x, y, label, value, width = undefined) {
+
+        value = `${value}`;
 
         const lastFontSize = doc.getFontSize();
 
@@ -76,23 +87,54 @@ function createInvoice(data) {
     doc.setFontSize(headerSize);
     doc.text('Invoice', ...paddedPos(0, headerSize));
 
-    // data
-    doc.setFontSize(textSize);
+    // customer info table
+    const customerInfoTableTop = headerSize + gap;
 
     // table row 1
-    createCell(0, headerSize + gap, 'NAME', data[ 'name' ], paddedPageWidth * .6);
-    createCell(paddedPageWidth * .6, headerSize + gap, 'DATE', data[ 'date' ], paddedPageWidth * .4);
+    createCell(0, customerInfoTableTop, 'NAME', data[ 'name' ], paddedPageWidth * .6);
+    createCell(paddedPageWidth * .6, customerInfoTableTop, 'DATE', data[ 'date' ], paddedPageWidth * .4);
 
     // table row 2
-    createCell(0, headerSize + gap + cellHeight, 'ADDRESS', data[ 'address' ], paddedPageWidth * .6);
-    createCell(paddedPageWidth * .6, headerSize + gap + cellHeight, 'PHONE', data[ 'phone' ], paddedPageWidth * .4);
+    createCell(0, customerInfoTableTop + cellHeight, 'ADDRESS', data[ 'address' ], paddedPageWidth * .6);
+    createCell(paddedPageWidth * .6, customerInfoTableTop + cellHeight, 'PHONE', data[ 'phone' ], paddedPageWidth * .4);
 
     // table row 3
-    createCell(0, headerSize + gap + cellHeight * 2, 'CITY', data[ 'city' ], paddedPageWidth);
+    createCell(0, customerInfoTableTop + cellHeight * 2, 'CITY', data[ 'city' ], paddedPageWidth);
 
     // table row 4
-    createCell(0, headerSize + gap + cellHeight * 3, 'SOURCE', data[ 'source' ], paddedPageWidth);
+    createCell(0, customerInfoTableTop + cellHeight * 3, 'SOURCE', data[ 'source' ], paddedPageWidth);
 
+    // vehicle info table
+    const vehicleInfoTableTop = customerInfoTableTop + cellHeight * 4 + gap;
+
+    // table row 1
+    createCell(0, vehicleInfoTableTop, 'YEAR', data[ 'year' ], paddedPageWidth * .1);
+    createCell(paddedPageWidth * .1, vehicleInfoTableTop, 'MAKE', data[ 'make' ], paddedPageWidth * .2);
+    createCell(paddedPageWidth * .3, vehicleInfoTableTop, 'MODEL', data[ 'model' ], paddedPageWidth * .2);
+    createCell(paddedPageWidth * .5, vehicleInfoTableTop, 'LICENSE NO.', data[ 'plate' ], paddedPageWidth * .25);
+    createCell(paddedPageWidth * .75, vehicleInfoTableTop, 'MILEAGE', data[ 'mileage' ], paddedPageWidth * .25);
+
+    // table row 2
+    const vinLabelSize = 16;
+    doc.setFontSize(vinLabelSize);
+    doc.text('VIN', ...paddedPos(vinLabelSize + cellPaddingX, vehicleInfoTableTop + cellHeight + doc.getTextWidth('VIN') + cellPaddingY), null, 90);
+    createCell(0, vehicleInfoTableTop + cellHeight, '', '', paddedPageWidth);
+
+    const vinCharSize = 20;
+    const vinCharWidth = 18;
+    const vinCharPadding = 2;
+    const vinStartX = pagePadding + vinLabelSize + cellPaddingX + 10;
+    const vinStartY = pagePadding + vehicleInfoTableTop + cellHeight;
+    const vinCharY = vinCharSize + vinStartY + cellPaddingY;
+    doc.setFontSize(vinCharSize);
+    doc.line(vinStartX, vinStartY, vinStartX, vinStartY + cellHeight);
+    for (let i = 0; i < 17; i++) {
+
+        const charX = i * vinCharWidth + vinStartX + vinCharPadding + vinCharPadding * i * 2;
+        doc.text(data[ 'vin' ][ i ] || '', charX, vinCharY);
+        doc.line(charX + vinCharWidth, vinStartY, charX + vinCharWidth, vinStartY + cellHeight);
+    
+    }
 
     doc.save(dir + '/test.pdf');
 
