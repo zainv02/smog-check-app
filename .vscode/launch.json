@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "Launch Program",
+            "program": "./smog-backend/dist/index.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "preLaunchTask": "compile-server",
+            "outputCapture": "console",
+            "envFile": "${workspaceFolder}/smog-backend/.env"
+        },
+    ]
+}
