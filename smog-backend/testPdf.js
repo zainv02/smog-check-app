@@ -120,6 +120,7 @@ function createInvoice(data) {
     doc.text('VIN', ...paddedPos(vinLabelSize + cellPaddingX, vehicleInfoTableTop + cellHeight + doc.getTextWidth('VIN') + cellPaddingY), null, 90);
     createCell(0, vehicleInfoTableTop + cellHeight, '', '', paddedPageWidth);
 
+    // fancy vin
     const vinCharSize = 20;
     const vinCharWidth = 18;
     const vinCharPadding = 2;
@@ -135,6 +136,60 @@ function createInvoice(data) {
         doc.line(charX + vinCharWidth, vinStartY, charX + vinCharWidth, vinStartY + cellHeight);
     
     }
+
+    // signature
+    const signatureBottom = paddedPageHeight;
+    const signatureLabelWidth = doc.getTextWidth('SIGNATURE');
+    doc.line(...paddedPos(signatureLabelWidth + 20, signatureBottom), ...paddedPos(paddedPageWidth, signatureBottom));
+
+    doc.setFontSize(16);
+    doc.setFont(doc.getFont().fontName, 'bold');
+    doc.text('SIGNATURE', ...paddedPos(0, signatureBottom));
+    
+    doc.setFontSize(24);
+    doc.text('X', ...paddedPos(signatureLabelWidth, signatureBottom), { align: 'center' });
+
+    if (data[ 'signature' ] !== undefined) {
+
+        for (let i = 0; i < data[ 'signature' ].length; i += 2) {
+
+            const x = data[ 'signature' ][ i ];
+            const y = data[ 'signature' ][ i + 1 ];
+            if (i === 0) {
+
+                doc.moveTo(x, y);
+            
+            } else {
+
+                doc.lineTo(x, y);
+            
+            }
+        
+        }
+
+        doc.stroke();
+    
+    }
+
+    // estimate
+    doc.setFont(doc.getFont().fontName);
+    const estimateHeight = 34;
+    const estimateWidth = 160;
+    doc.setFontSize(12);
+    doc.text('ESTIMATE', ...paddedPos(paddedPageWidth - estimateWidth, signatureBottom - estimateHeight));
+    doc.setFontSize(estimateHeight * .7);
+    doc.setFont(doc.getFont().fontName, 'bold');
+    const currencySymbolWidth = doc.getTextWidth('$');
+    const estimateValueBottom = signatureBottom - estimateHeight * .2;
+    doc.text('$', ...paddedPos(paddedPageWidth - estimateWidth, estimateValueBottom));
+    doc.setFont(doc.getFont().fontName);
+    const parsedEstimate = Number.parseFloat(data[ 'estimate' ]);
+    if (!isNaN(parsedEstimate)) {
+
+        doc.text(`${parsedEstimate.toFixed(2)}`, ...paddedPos(paddedPageWidth - estimateWidth + currencySymbolWidth + 4, estimateValueBottom));
+    
+    }
+    
 
     doc.save(dir + '/test.pdf');
 
@@ -152,7 +207,9 @@ createInvoice({
     'make':'Subaru',
     'model':'Impreza',
     'plate':'6LEE230',
-    'mileage':21
+    'mileage':21,
+    'estimate': 200.23,
+    'signature': [ 200, 200, 200, 300, 300, 500, 500, 30 ]
 });
 
 // const dir = path.resolve('../../temp');
