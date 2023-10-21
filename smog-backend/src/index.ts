@@ -19,7 +19,7 @@ dotenv.config();
  */
 let server: http.Server;
 const app = express();
-const PORT = process.env.port || 4000;
+const PORT = process.env.PORT || 4000;
 
 app.use(express.json());
 
@@ -35,13 +35,41 @@ initialize({
     routesIndexFileRegExp: /(?:index)?\.[tj]s$/
 });
 
-app.use(((err, _req, res, _next) => {
+// app.use(((err, req, res, next) => {
 
-    console.log('request error:', err);
+//     let responseData;
+//     if (err.name === 'JsonSchemaValidation') {
 
-    res.status(err.status).json(err);
+//         console.error(err.message);
+//         res.status(400);
+//         responseData = {
+//             statusText: 'Bad Request',
+//             jsonSchemaValidation: true,
+//             validations: err.validations
+//         };
+//         if (req.xhr || req.get('Content-Type') === 'application/json') {
 
-}) as express.ErrorRequestHandler);
+//             res.json(responseData);
+        
+//         }
+    
+//     } else {
+
+//         // pass error to next error middleware handler
+//         next(err);
+    
+//     }
+
+// }) as express.ErrorRequestHandler);
+
+// app.use(((err, _req, res, _next) => {
+
+//     console.log(` ERROR ${err.name}`);
+//     console.log('request error:', err);
+
+//     res.status(err.status).json(err);
+
+// }) as express.ErrorRequestHandler);
 
 
 

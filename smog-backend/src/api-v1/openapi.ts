@@ -22,7 +22,14 @@ const apiDoc: OpenAPIV3.Document = {
                         type: 'string'
                     },
                     year: {
-                        type: 'number'
+                        oneOf: [
+                            {
+                                type: 'string'
+                            },
+                            {
+                                type: 'number'
+                            }
+                        ]
                     },
                     make: {
                         type: 'string'
@@ -34,7 +41,14 @@ const apiDoc: OpenAPIV3.Document = {
                         type: 'string'
                     },
                     mileage: {
-                        type: 'number'
+                        oneOf: [
+                            {
+                                type: 'string'
+                            },
+                            {
+                                type: 'number'
+                            }
+                        ]
                     },
                 },
                 required: [ 
@@ -45,10 +59,9 @@ const apiDoc: OpenAPIV3.Document = {
                     'plate',
                     'mileage' 
                 ],
-                additionalProperties: false,
                 example: {
                     'vin':'JF1GE7E68AH505850',
-                    'year':'2010',
+                    'year':2010,
                     'make':'Subaru',
                     'model':'Impreza',
                     'plate':'6LEE230',
@@ -74,7 +87,6 @@ const apiDoc: OpenAPIV3.Document = {
                         type: 'string'
                     },
                 },
-                additionalProperties: false,
                 example: {
                     // 'id': 'JO1231',
                     'name':'John',

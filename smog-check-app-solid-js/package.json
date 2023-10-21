@@ -30,7 +30,11 @@
   "dependencies": {
     "@solidjs/router": "^0.8.3",
     "axios": "^1.5.1",
+    "base-64": "^1.0.0",
+    "pdfjs-dist": "^3.11.174",
+    "pdfobject": "^2.2.12",
     "solid-js": "^1.7.6",
+    "utf8": "^3.0.0",
     "vike": "^0.4.143",
     "vite-plugin-solid-svg": "^0.7.0"
   },

@@ -1,11 +1,24 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { jsPDF } = require('jspdf');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-// const path = require('node:path');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('node:fs');
 
-function createInvoice(data) {
+import { jsPDF } from 'jspdf';
+
+export interface InvoiceData {
+    name: string,
+    date: string,
+    address: string,
+    phone: string,
+    city: string,
+    source: string,
+    year: number | string,
+    make: string,
+    model: string,
+    plate: string,
+    mileage: number | string,
+    vin: string,
+    estimate: number | string,
+    signature?: number[][]
+}
+
+export function createInvoice(data: InvoiceData): jsPDF {
 
     const doc = new jsPDF({
         orientation: 'portrait',
@@ -13,46 +26,24 @@ function createInvoice(data) {
         format: 'a4' // 595 pt x 842 pt allegedly
     });
 
-    const dir = './temp';
-
-    if (!fs.existsSync(dir)) {
-
-        fs.mkdirSync(dir);
-    
-    }
-
     // these are in pt (points)
     const pageWidth = 595;
     const pageHeight = 842;
     const pagePadding = 40;
     const paddedPageWidth = pageWidth - pagePadding * 2;
     const paddedPageHeight = pageHeight - pagePadding * 2;
-    const paddedMaxX = pageWidth - pagePadding;
-    const paddedMaxY = pageHeight - pagePadding;
-    const pageCenterX = pageWidth / 2;
-    const pageCenterY = pageHeight / 2;
+    // const paddedMaxX = pageWidth - pagePadding;
+    // const paddedMaxY = pageHeight - pagePadding;
+    // const pageCenterX = pageWidth / 2;
+    // const pageCenterY = pageHeight / 2;
     
     const headerSize = 40;
-    const textSize = 16;
+    // const textSize = 16;
     const gap = 10;
 
-    /**
-     * 
-     * @param {*} x 
-     * @param {*} y 
-     * @returns {[number, number]}
-     */
-    function paddedPos(x, y) {
+    function paddedPos(x: number, y: number): [number, number] {
 
         return [ pagePadding + x, pagePadding + y ];
-    
-    }
-    
-    function filterObject(obj, keys = []) {
-
-        return Object.fromEntries(
-            Object.entries(obj).filter(([ key ]) => keys.includes(key))
-        );
     
     }
 
@@ -61,13 +52,13 @@ function createInvoice(data) {
     const cellPaddingX = 10;
     const cellPaddingY = 5;
     const cellHeight = cellLabelSize + cellValueSize + cellPaddingY * 2;
-    function createCell(x, y, label, value, width = undefined) {
+    function createCell(x: number, y: number, label: string, value: unknown, width?: number) {
 
-        value = `${value}`;
+        const strValue = `${value}`;
 
         const lastFontSize = doc.getFontSize();
 
-        const valueWidth = doc.getTextWidth(value);
+        const valueWidth = doc.getTextWidth(strValue);
         
         const cellWidth = width || valueWidth + cellPaddingX * 2;
         doc.rect(pagePadding + x, pagePadding + y, cellWidth, cellHeight);
@@ -75,7 +66,7 @@ function createInvoice(data) {
         doc.setFontSize(cellLabelSize);
         doc.text(label, pagePadding + x + cellPaddingX, pagePadding + y + cellLabelSize + cellPaddingY);
         doc.setFontSize(cellValueSize);
-        doc.text(value, pagePadding + x + cellPaddingX, pagePadding + y + cellValueSize + cellLabelSize + cellPaddingY);
+        doc.text(strValue, pagePadding + x + cellPaddingX, pagePadding + y + cellValueSize + cellLabelSize + cellPaddingY);
 
         doc.setFontSize(lastFontSize);
 
@@ -117,7 +108,7 @@ function createInvoice(data) {
     // table row 2
     const vinLabelSize = 16;
     doc.setFontSize(vinLabelSize);
-    doc.text('VIN', ...paddedPos(vinLabelSize + cellPaddingX, vehicleInfoTableTop + cellHeight + doc.getTextWidth('VIN') + cellPaddingY), null, 90);
+    doc.text('VIN', ...paddedPos(vinLabelSize + cellPaddingX, vehicleInfoTableTop + cellHeight + doc.getTextWidth('VIN') + cellPaddingY), undefined, 90);
     createCell(0, vehicleInfoTableTop + cellHeight, '', '', paddedPageWidth);
 
     // fancy vin
@@ -193,7 +184,7 @@ function createInvoice(data) {
     const estimateValueBottom = signatureBottom - estimateHeight * .2;
     doc.text('$', ...paddedPos(paddedPageWidth - estimateWidth, estimateValueBottom));
     doc.setFont(doc.getFont().fontName);
-    const parsedEstimate = Number.parseFloat(data[ 'estimate' ]);
+    const parsedEstimate = Number.parseFloat(`${data[ 'estimate' ]}`);
     if (!isNaN(parsedEstimate)) {
 
         doc.text(`${parsedEstimate.toFixed(2)}`, ...paddedPos(paddedPageWidth - estimateWidth + currencySymbolWidth + 4, estimateValueBottom));
@@ -201,11 +192,13 @@ function createInvoice(data) {
     }
     
 
-    doc.save(dir + '/test.pdf');
+    // doc.save(dir + '/test.pdf');
+
+    return doc;
 
 }
 
-createInvoice({
+export const EXAMPLE_DATA: InvoiceData = {
     'name':'John',
     'address':'1234 Cool Street',
     'city':'San Limon',
@@ -213,17 +206,11 @@ createInvoice({
     'source':'Source',
     'date': '12-21-2022',
     'vin':'JF1GE7E68AH505850',
-    'year':'2010',
+    'year':2010,
     'make':'Subaru',
     'model':'Impreza',
     'plate':'6LEE230',
     'mileage':21,
     'estimate': 200.23,
-    'signature': [ [ 19.046875,31.5,27.046875,25.5,31.046875,23.5,35.046875,21.5,39.046875,18.5,43.046875,17.5,46.046875,15.5,49.046875,13.5,52.046875,12.5,53.046875,17.5,51.046875,24.5,49.046875,29.5,47.046875,35.5,45.046875,42.5,42.046875,49.5,39.046875,56.5,36.046875,62.5,32.046875,67.5,29.046875,72.5,26.046875,77.5,23.046875,80.5,21.046875,83.5,21.046875,79.5,23.046875,75.5,26.046875,70.5,30.046875,65.5,34.046875,58.5,39.046875,52.5,45.046875,46.5,51.046875,40.5,56.046875,34.5,61.046875,28.5,66.046875,23.5,70.046875,20.5,72.046875,17.5,70.046875,23.5,67.046875,26.5,64.046875,31.5,61.046875,36.5,58.046875,42.5,55.046875,47.5,51.046875,51.5,49.046875,55.5,46.046875,59.5,44.046875,62.5,42.046875,65.5,40.046875,68.5,38.046875,71.5,37.046875,75.5,41.046875,71.5,44.046875,68.5,47.046875,64.5,51.046875,59.5,56.046875,55.5,61.046875,50.5,65.046875,45.5,71.046875,39.5,75.046875,35.5,80.046875,30.5,84.046875,26.5,87.046875,22.5,89.046875,19.5,91.046875,16.5,90.046875,20.5,89.046875,23.5,86.046875,26.5,84.046875,30.5,81.046875,34.5,77.046875,39.5,73.046875,45.5,70.046875,50.5,66.046875,56.5,63.046875,61.5,60.046875,66.5,58.046875,70.5,56.046875,74.5,55.046875,77.5,60.046875,75.5,63.046875,73.5,67.046875,69.5,72.046875,65.5,77.046875,61.5,81.046875,57.5,86.046875,53.5,89.046875,50.5,91.046875,47.5,92.046875,43.5,89.046875,47.5,86.046875,50.5,82.046875,56.5,80.046875,59.5,79.046875,63.5,78.046875,66.5,77.046875,71.5,81.046875,69.5,85.046875,65.5,88.046875,63.5,91.046875,60.5,93.046875,57.5,97.046875,53.5,98.046875,56.5,98.046875,61.5,97.046875,65.5,99.046875,61.5,103.046875,56.5,106.046875,52.5,109.046875,48.5,112.046875,44.5,115.046875,40.5,118.046875,36.5,120.046875,32.5,121.046875,29.5,122.046875,26.5,119.046875,29.5,118.046875,32.5,117.046875,36.5,115.046875,42.5,114.046875,47.5,113.046875,52.5,112.046875,56.5,111.046875,59.5,112.046875,63.5,116.046875,61.5,121.046875,58.5,124.046875,55.5,127.046875,52.5,130.046875,48.5,134.046875,44.5,137.046875,40.5,140.046875,35.5,142.046875,31.5,143.046875,28.5,143.046875,22.5,142.046875,26.5,141.046875,29.5,140.046875,34.5,140.046875,39.5,139.046875,45.5,138.046875,51.5,137.046875,58.5,136.046875,63.5,135.046875,67.5,135.046875,71.5,136.046875,74.5,138.046875,70.5,140.046875,66.5,142.046875,62.5,145.046875,58.5,147.046875,53.5,151.046875,48.5,154.046875,43.5,156.046875,37.5,159.046875,31.5,161.046875,26.5,163.046875,22.5,165.046875,18.5,166.046875,14.5,165.046875,10.5,164.046875,14.5,163.046875,17.5,162.046875,24.5,162.046875,28.5,161.046875,33.5,161.046875,37.5,160.046875,43.5,159.046875,48.5,159.046875,52.5,159.046875,57.5,159.046875,61.5,159.046875,67.5,162.046875,69.5,166.046875,69.5,170.046875,66.5,173.046875,63.5,176.046875,61.5,179.046875,58.5,182.046875,56.5,185.046875,54.5,189.046875,53.5,192.046875,62.5,193.046875,66.5,194.046875,70.5,195.046875,73.5,195.046875,77.5,196.046875,83.5,197.046875,87.5,197.046875,82.5,199.046875,78.5,202.046875,73.5,204.046875,70.5,206.046875,67.5,207.046875,61.5,208.046875,57.5,206.046875,61.5,205.046875,67.5,204.046875,74.5,204.046875,78.5,203.046875,82.5,204.046875,86.5,208.046875,85.5,211.046875,82.5,216.046875,77.5,221.046875,73.5,224.046875,69.5,227.046875,65.5,228.046875,62.5,227.046875,65.5,226.046875,69.5,226.046875,73.5,226.046875,77.5,229.046875,79.5,232.046875,77.5,235.046875,79.5,239.046875,80.5,243.046875,80.5,243.046875,76.5,240.046875,73.5,238.046875,69.5,236.046875,66.5,232.046875,64.5,229.046875,63.5,228.046875,66.5,224.046875,63.5,221.046875,61.5,218.046875,57.5,214.046875,54.5,211.046875,51.5,215.046875,51.5,218.046875,50.5,105.046875,41.5,116.046875,42.5,122.046875,42.5,128.046875,42.5,135.046875,41.5,144.046875,40.5,154.046875,39.5,166.046875,38.5,180.046875,38.5,195.046875,37.5,210.046875,36.5,224.046875,35.5,238.046875,35.5,249.046875,35.5,258.046875,35.5,265.046875,35.5,269.046875,35.5 ] ]
-});
-
-// const dir = path.resolve('../../temp');
-
-// const pdfPath = dir + '/' + 'invoice.pdf';
-
-// console.log(path.relative(pdfPath, '.'));
+    'signature': [ [ 44.046875,27.5,46.046875,35.5,47.046875,38.5,48.046875,43.5,49.046875,46.5,50.046875,51.5,52.046875,54.5,53.046875,57.5,55.046875,61.5 ],[ 26.046875,47.5,33.046875,40.5,36.046875,38.5,39.046875,36.5,43.046875,33.5,47.046875,31.5,52.046875,29.5,56.046875,27.5,61.046875,25.5,64.046875,23.5 ],[ 58.046875,46.5,68.046875,45.5,71.046875,44.5,74.046875,43.5,77.046875,41.5,80.046875,38.5,79.046875,35.5,76.046875,33.5,73.046875,32.5,69.046875,33.5,66.046875,36.5,64.046875,40.5,62.046875,43.5,62.046875,48.5,64.046875,51.5,68.046875,51.5,72.046875,50.5,76.046875,50.5,79.046875,49.5,82.046875,47.5,86.046875,44.5 ],[ 102.046875,26.5,93.046875,27.5,89.046875,28.5,85.046875,31.5,83.046875,34.5,87.046875,36.5,93.046875,36.5,99.046875,36.5,103.046875,36.5,104.046875,39.5,104.046875,43.5,101.046875,44.5,96.046875,46.5,93.046875,47.5,90.046875,48.5,86.046875,51.5 ],[ 118.046875,19.5,120.046875,28.5,121.046875,31.5,122.046875,35.5,125.046875,52.5 ],[ 110.046875,33.5,119.046875,30.5,122.046875,29.5,125.046875,28.5,128.046875,27.5,133.046875,24.5,137.046875,23.5 ] ]
+};

@@ -67,3 +67,58 @@ export async function getUserInfo(params: UserInfoParams) {
     }
 
 }
+
+export interface InvoiceData {
+    name?: string,
+    date?: string,
+    address?: string,
+    phone?: string,
+    city?: string,
+    source?: string,
+    year?: number | string,
+    make?: string,
+    model?: string,
+    plate?: string,
+    mileage?: number | string,
+    vin?: string,
+    estimate?: number | string,
+    signature?: number[][]
+}
+
+export async function getInvoice(data: InvoiceData) {
+
+    if (!data) {
+
+        console.warn('getInvoice needs data!');
+        return;
+    
+    }
+
+    try {
+
+        const response = await axios.post(
+            createServerUrl('/create-invoice'), 
+            data, 
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/pdf'
+                }
+            }
+        );
+
+        if (response.status !== 200) {
+
+            throw new Error('bad status');
+        
+        }
+
+        return response.data;
+        
+    } catch (error) {
+
+        console.error('getInvoice error', error);
+    
+    }
+
+}

@@ -1,11 +1,14 @@
 import { ParentComponent, For , Component, JSX, createSignal, createEffect } from 'solid-js';
 import { twMerge } from 'tailwind-merge';
 
+import { usePropFilter } from '$src/utils/usePropFilter';
 
-export const Form: ParentComponent<{[key in keyof Omit<JSX.HTMLElementTags['form'], 'class'>]: JSX.HTMLElementTags['form'][key]}> = (props) => {
+export const Form: ParentComponent<JSX.HTMLElementTags['form']> = (props) => {
+
+    const spreadProps = usePropFilter(props, [ 'class' ]);
 
     return (
-        <form class='flex flex-col items-center [&>*]:mt-4 [&>*]:w-full' {...props}>
+        <form class={twMerge('flex flex-col items-center [&>*:not(&>*:first-child)]:mt-4 [&>*]:w-full', props.class)} {...spreadProps()}>
             {props.children}
         </form>
     );
@@ -139,15 +142,7 @@ type InputFieldProps = Omit<FieldProps & JSX.HTMLElementTags['input'], 'type'> &
 
 export const InputField: Component<InputFieldProps> = (props) => {
 
-    const [ spreadProps, setSpreadProps ] = createSignal({});
-
-    createEffect(() => {
-
-        // eslint-disable-next-line solid/reactivity
-        const { class: _class, onInput: _onInput, onKeyDown: _onKeyDown, onPaste: _onPaste, ...otherProps } = props;
-        setSpreadProps(otherProps);
-    
-    });
+    const spreadProps = usePropFilter(props, [ 'class', 'onInput', 'onKeyDown', 'onPaste' ]);
 
     const [ errorVisible, setErrorVisible ] = createSignal<boolean>(false);
     const [ errorMessage, setErrorMessage ] = createSignal<string>('');
@@ -345,16 +340,8 @@ type SelectFieldProps = FieldProps & JSX.HTMLElementTags['select'] & {
 
 export const SelectField: Component<SelectFieldProps> = (props) => {
 
-    const [ spreadProps, setSpreadProps ] = createSignal({});
-
-    createEffect(() => {
-
-        // eslint-disable-next-line solid/reactivity
-        const { class: _class, ...otherProps } = props;
-        setSpreadProps(otherProps);
+    const spreadProps = usePropFilter(props, [ 'class' ]);
     
-    });
-
     const [ errorVisible, _setErrorVisible ] = createSignal<boolean>(false);
     const [ errorMessage, _setErrorMessage ] = createSignal<string>('');
 

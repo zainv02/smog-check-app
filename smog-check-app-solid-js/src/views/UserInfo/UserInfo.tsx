@@ -48,7 +48,7 @@ const UserInfo: Component = () => {
 
         console.log(customerInfo);
 
-        navigate('/invoice' + `?${new URLSearchParams(customerInfo)}`);
+        navigate('/sign' + `?${new URLSearchParams(customerInfo)}`);
     
     };
 

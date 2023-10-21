@@ -1,21 +1,20 @@
 import { useNavigate } from '@solidjs/router';
 import { Component, JSX, createSignal } from 'solid-js';
+import { twMerge } from 'tailwind-merge';
 
 import { ButtonStyles, LinkButton, SubmitButton } from '$components/Button';
 import { Form, InputField, SelectField } from '$components/Form';
 import { Title } from '$components/Header';
 import { Panel, Section } from '$components/Layout';
 import { LoadingDisplay } from '$components/LoadingDisplay';
-import * as API from '$src/backendHook';
-// import { setGlobalValue } from '$src/data/global';
+import { getUserInfo } from '$src/backendHook';
 import { states } from '$src/data/states';
 import { getFormFields } from '$src/utils/formUtils';
 
-// const api = new BackendAPI();
 
 const LicensePlateInfo: Component = () => {
 
-    // let targetUrl: URL;
+    const [ submitError, setSubmitError ] = createSignal('');
 
     const [ submitting, setSubmitting ] = createSignal(false);
     const navigate = useNavigate();
@@ -34,11 +33,7 @@ const LicensePlateInfo: Component = () => {
 
         const fields = getFormFields(e.currentTarget) as Record<string, string>;
 
-        console.log('fields:', fields);
-
-        // setSearchParams(fields as Record<string, string>, { replace: true });
-
-        const result = await API.getUserInfo({
+        const result = await getUserInfo({
             plate: fields.plate,
             state: fields.state
         });
@@ -47,26 +42,15 @@ const LicensePlateInfo: Component = () => {
 
             console.log('success with result', result);
             console.log('going to user-info page');
-            
-            // setSearchParams(result as Record<string, string>, { replace: true });
-
-            // setGlobalValue('userInfo', result);
 
             navigate('/user-info' + `?${new URLSearchParams(result)}`);
         
+        } else {
+
+            console.error('failed to get user info');
+            setSubmitError('Couldn\'t find the requested vehicle information. Check that the license plate and state are correct.');
+
         }
-
-        
-
-        // setTimeout(() => {
-
-        //     // setFormSubmitted(true);
-        //     window.location.href = url.toString();
-        //     navigate('/user-info', {});
-            
-        
-        // }, 2000);
-        // // setFormSubmitted(true);
 
         setSubmitting(false);
     
@@ -74,10 +58,10 @@ const LicensePlateInfo: Component = () => {
 
     return <>
         <Section>
-            <Panel class='relative'>
+            <Panel class='relative w-96'>
                 <Title>License Plate Info</Title>
-            
                 <Form onSubmit={handleSubmit}>
+                    <p class={twMerge('text-red-500 w-full', submitError().length === 0 && 'hidden')}>{submitError()}</p>
                     <InputField 
                         name='plate' label='License Plate:' type='text' 
                         inputTransformer={(char) => {
