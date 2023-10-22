@@ -1,6 +1,8 @@
 import { Operation } from 'express-openapi';
+import cors from 'cors';
 
 export const GET: Operation = [
+    cors(),
     (_req, res) => {
 
         const req = _req as typeof _req & { apiDoc: object };

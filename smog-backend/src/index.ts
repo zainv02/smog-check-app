@@ -1,11 +1,12 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { initialize } from 'express-openapi';
-import cors from 'cors';
 import apiDoc from './api-v1/openapi';
 import path from 'path';
 import * as http from 'node:http';
-import { stop as stopDatabase } from './databaseUtil';
+import { stop as stopDatabase } from './utils/databaseUtil';
+import { SessionManager } from './sessionManager';
+import { UserVehicleInfo } from './types';
 
 // https://github.com/ajv-validator/ajv/issues/2132
 // const Ajv = _Ajv as unknown as typeof _Ajv.default; 
@@ -23,7 +24,7 @@ const PORT = process.env.PORT || 4000;
 
 app.use(express.json());
 
-app.use(cors());
+// app.use(cors());
 
 
 
@@ -35,43 +36,18 @@ initialize({
     routesIndexFileRegExp: /(?:index)?\.[tj]s$/
 });
 
-// app.use(((err, req, res, next) => {
 
-//     let responseData;
-//     if (err.name === 'JsonSchemaValidation') {
+// sessions
 
-//         console.error(err.message);
-//         res.status(400);
-//         responseData = {
-//             statusText: 'Bad Request',
-//             jsonSchemaValidation: true,
-//             validations: err.validations
-//         };
-//         if (req.xhr || req.get('Content-Type') === 'application/json') {
+export const userSessionManager = new SessionManager(
+    () => {
 
-//             res.json(responseData);
-        
-//         }
+        return {
+            id: ''
+        } as UserVehicleInfo;
     
-//     } else {
-
-//         // pass error to next error middleware handler
-//         next(err);
-    
-//     }
-
-// }) as express.ErrorRequestHandler);
-
-// app.use(((err, _req, res, _next) => {
-
-//     console.log(` ERROR ${err.name}`);
-//     console.log('request error:', err);
-
-//     res.status(err.status).json(err);
-
-// }) as express.ErrorRequestHandler);
-
-
+    }
+);
 
 
 process.on('SIGINT', async () => {

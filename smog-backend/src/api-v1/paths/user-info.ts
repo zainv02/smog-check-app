@@ -22,9 +22,11 @@ customer result: [
   }
  */
 
-import { query } from '../../databaseUtil';
-import { getVehicleData, getVinData } from '../../vehicleInfoUtil';
+import { query } from '../../utils/databaseUtil';
+import { getVehicleData, getVinData } from '../../utils/vehicleInfoUtil';
 import { Operation } from 'express-openapi';
+import { userSessionManager } from '../..';
+import { UserVehicleInfo } from '../../types';
 
 
 export const POST: Operation = [
@@ -33,7 +35,7 @@ export const POST: Operation = [
         try {
 
             // to be filled with stuff
-            const userInfo = {};
+            const userVehicleInfo: UserVehicleInfo = {};
 
             // get vehicle data
             // either from vin api or from stored info for customer
@@ -55,7 +57,7 @@ export const POST: Operation = [
         
             }
 
-            Object.assign(userInfo, {
+            Object.assign(userVehicleInfo, {
                 vin: vinData[ 'vin' ],
                 year: vinData[ 'year' ],
                 make: vinData[ 'make' ],
@@ -96,7 +98,7 @@ export const POST: Operation = [
 
                     // console.log('customer result:', databaseCustomerResult.rows);
 
-                    Object.assign(userInfo, {
+                    Object.assign(userVehicleInfo, {
                         id: customerData[ 'CustID' ],
                         name: customerData[ 'Name' ],
                         address: customerData[ 'Address1' ],
@@ -105,7 +107,7 @@ export const POST: Operation = [
                         source: '',
                     });
 
-                    res.status(200).send(userInfo);
+                    res.status(200).send(userVehicleInfo);
                     return;
         
                 } else {
@@ -122,7 +124,7 @@ export const POST: Operation = [
                 // console.log('failed to find customer from vin. new customer?');
 
                 // send whatever is there
-                res.status(200).send(userInfo);
+                res.status(200).send(userVehicleInfo);
                 return;
             
             }
@@ -197,12 +199,17 @@ POST.apiDoc = {
                                     id: {
                                         type: 'string'
                                     },
+                                    session: {
+                                        type: 'string'
+                                    }
                                 },
                                 required: [
-                                    'id'
+                                    'id',
+                                    'session'
                                 ],
                                 example: {
-                                    'id': 'JON123'
+                                    'id': 'JON123',
+                                    'session': 'acde070d-8c4c-4f0d-9d8a-162843c10333'
                                 }
                             }
                         ],

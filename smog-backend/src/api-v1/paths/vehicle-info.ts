@@ -1,5 +1,5 @@
 // import Ajv, { JSONSchemaType } from 'ajv';
-import { getVehicleData, getVinData } from '../../vehicleInfoUtil';
+import { getVehicleData, getVinData } from '../../utils/vehicleInfoUtil';
 import { Operation } from 'express-openapi';
 
 // const ajv = new Ajv();

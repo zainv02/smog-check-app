@@ -1,21 +1,9 @@
 
 import { jsPDF } from 'jspdf';
+import { UserVehicleInfo } from '../types';
 
-export interface InvoiceData {
-    name: string,
-    date: string,
-    address: string,
-    phone: string,
-    city: string,
-    source: string,
-    year: number | string,
-    make: string,
-    model: string,
-    plate: string,
-    mileage: number | string,
-    vin: string,
-    estimate: number | string,
-    signature?: number[][]
+export interface InvoiceData extends Omit<UserVehicleInfo, 'id'> {
+
 }
 
 export function createInvoice(data: InvoiceData): jsPDF {
@@ -54,7 +42,7 @@ export function createInvoice(data: InvoiceData): jsPDF {
     const cellHeight = cellLabelSize + cellValueSize + cellPaddingY * 2;
     function createCell(x: number, y: number, label: string, value: unknown, width?: number) {
 
-        const strValue = `${value}`;
+        const strValue = `${value !== undefined ? value : ''}`;
 
         const lastFontSize = doc.getFontSize();
 
@@ -123,7 +111,12 @@ export function createInvoice(data: InvoiceData): jsPDF {
     for (let i = 0; i < 17; i++) {
 
         const charX = i * vinCharWidth + vinStartX + vinCharPadding + vinCharPadding * i * 2;
-        doc.text(data[ 'vin' ][ i ] || '', charX, vinCharY);
+        if (data[ 'vin' ] && data[ 'vin' ][ i ]) {
+
+            doc.text(data[ 'vin' ][ i ], charX, vinCharY);
+        
+        }
+        
         doc.line(charX + vinCharWidth, vinStartY, charX + vinCharWidth, vinStartY + cellHeight);
     
     }
@@ -198,7 +191,7 @@ export function createInvoice(data: InvoiceData): jsPDF {
 
 }
 
-export const EXAMPLE_DATA: InvoiceData = {
+export const EXAMPLE_INVOICE_DATA: InvoiceData = {
     'name':'John',
     'address':'1234 Cool Street',
     'city':'San Limon',

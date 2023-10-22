@@ -1,13 +1,14 @@
 import { useSearchParams } from '@solidjs/router';
-import base64 from 'base-64';
+// import base64 from 'base-64';
 // import PDFObject from 'pdfobject';
 import { Component, JSX, createSignal, onCleanup, onMount } from 'solid-js';
-import utf8 from 'utf8';
+// import utf8 from 'utf8';
 
 import { Button, ButtonStyles, SubmitButton } from '$components/Button';
 import { Form } from '$components/Form';
 import { Title } from '$components/Header';
 import { Panel, Section } from '$components/Layout';
+import { LoadingDisplay } from '$components/LoadingDisplay';
 import { getInvoice } from '$src/backendHook';
 
 
@@ -22,7 +23,7 @@ const SignPage: Component = () => {
     const [ signed, setSigned ] = createSignal(false);
     const [ canvasSize, setCanvasSize ] = createSignal<[number, number]>([ 0, 0 ]);
     const [ searchParams ] = useSearchParams();
-    const [ pdfSrc, setPdfSrc ] = createSignal('');
+    // const [ pdfSrc, setPdfSrc ] = createSignal('');
 
     let canvas: HTMLCanvasElement;
     let ctx: CanvasRenderingContext2D;
@@ -50,12 +51,18 @@ const SignPage: Component = () => {
         resizeObserver.observe(canvas);
 
         ctx = canvas.getContext('2d');
+
+        window.addEventListener('touchend', handleDrawEnd);
+        window.addEventListener('mouseup', handleDrawEnd);
     
     });
 
     onCleanup(() => {
 
         resizeObserver.disconnect();
+
+        window.removeEventListener('touchend', handleDrawEnd);
+        window.removeEventListener('mouseup', handleDrawEnd);
     
     });
 
@@ -79,6 +86,8 @@ const SignPage: Component = () => {
 
         prevPos = e.pos;
         currentPoints = [ ...e.pos ];
+        ctx.fillRect(...e.pos, 3, 3);
+        ctx.lineWidth = 1;
         setDrawing(true);
     
     };
@@ -110,8 +119,13 @@ const SignPage: Component = () => {
     
     };
 
-    const handleDrawEnd: DrawEventHandler = (_e) => {
+    const handleDrawEnd = () => {
         
+        if (!drawing()) {
+
+            return;
+        
+        }
         setDrawing(false);
         setSigned(true);
         lines.push(currentPoints);
@@ -167,10 +181,10 @@ const SignPage: Component = () => {
 
             console.log('success with result', result);
 
-            const dataUrl = `data:application/pdf;filename=invoice.pdf;base64,${base64.encode(utf8.encode(result))}`;
+            // const dataUrl = `data:application/pdf;filename=invoice.pdf;base64,${base64.encode(utf8.encode(result))}`;
 
             // tested btoa(unescape(encodeURIComponent(result))) and it works, but unescape is deprecated, so trying to replace
-            setPdfSrc(dataUrl);
+            // setPdfSrc(dataUrl);
             // PDFObject.embed(dataUrl, '#pdfobject');
 
             // navigate('/user-info' + `?${new URLSearchParams(result)}`);
@@ -189,7 +203,7 @@ const SignPage: Component = () => {
 
     return (
         <Section>
-            <Panel>
+            <Panel class='relative'>
                 <Title>Confirm Estimate</Title>
                 <Form onSubmit={handleSubmit} class='w-full'>
                     <p class='text-center text-4xl'>${Number.parseFloat(`${200}`).toFixed(2)}</p>
@@ -208,17 +222,29 @@ const SignPage: Component = () => {
                             }}
                             onTouchMove={e => {
 
-                                // consider preventing event in a scroll situation so that it doesnt make u scroll while drawing
-                                // e.preventDefault();
                                 const rect = e.currentTarget.getBoundingClientRect();
                                 handleDrawMove({ pos: [ e.touches[ 0 ].clientX - rect.left, e.touches[ 0 ].clientY - rect.top ] });
                         
                             }}
-                            onTouchEnd={e => {
+                            onTouchEnd={() => {
 
-                                const rect = e.currentTarget.getBoundingClientRect();
-                                handleDrawEnd({ pos: [ e.changedTouches[ 0 ].clientX - rect.left, e.changedTouches[ 0 ].clientY - rect.top ] });
+                                handleDrawEnd();
 
+                            }}
+                            onMouseDown={e => {
+
+                                handleDrawStart({ pos: [ e.offsetX, e.offsetY ] });
+                            
+                            }}
+                            onMouseMove={e => {
+
+                                handleDrawMove({ pos: [ e.offsetX, e.offsetY ] });
+                            
+                            }}
+                            onMouseUp={() => {
+
+                                handleDrawEnd();
+                            
                             }}
                         />
                     </div>
@@ -236,9 +262,10 @@ const SignPage: Component = () => {
                         <SubmitButton buttonStyle={ButtonStyles.PRIMARY} disabled={submitting() || !signed()}>Confirm</SubmitButton>
                     </div>
                 </Form>
+                {submitting() && <LoadingDisplay />}
             </Panel>
             {/* <div id='pdfobject' class='h-[400px] w-[500px]' /> */}
-            <embed src={pdfSrc()} type='application/pdf' width={500} height={400} class='outline outline-red-500' />
+            {/* <embed src={pdfSrc()} type='application/pdf' width={500} height={400} class='outline outline-red-500' /> */}
         </Section>
     );
 

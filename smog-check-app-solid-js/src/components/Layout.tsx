@@ -1,4 +1,4 @@
-import { JSX, ParentComponent, createEffect, createSignal } from 'solid-js';
+import { JSX, ParentComponent } from 'solid-js';
 import { twMerge } from 'tailwind-merge';
 
 import { usePropFilter } from '$src/utils/usePropFilter';

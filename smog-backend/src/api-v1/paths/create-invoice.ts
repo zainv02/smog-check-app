@@ -2,7 +2,7 @@ import { Operation } from 'express-openapi';
 import fs from 'node:fs';
 import path from 'node:path';
 // import { jsPDF } from 'jspdf';
-import { EXAMPLE_DATA, createInvoice } from '../../invoiceUtil';
+import { EXAMPLE_INVOICE_DATA, createInvoice } from '../../utils/invoiceUtil';
 import * as pdfjsLib from 'pdfjs-dist';
 
 import { createCanvas } from 'canvas';
@@ -18,9 +18,11 @@ export const POST: Operation = [
         // return;
         try {
 
-            console.log('current dir', path.resolve('.'));
+            // console.log('current dir', path.resolve('.'));
 
-            const dir = path.resolve(__dirname + '/../../temp');
+            const dir = path.resolve(__dirname + '/../../../temp');
+
+            console.log('saving pdfs to: ', dir);
     
             if (!fs.existsSync(dir)) {
     
@@ -133,7 +135,7 @@ POST.apiDoc = {
                             }
                         },
                     ],
-                    example: EXAMPLE_DATA,
+                    example: EXAMPLE_INVOICE_DATA,
                     additionalProperties: true
                 }
             }
