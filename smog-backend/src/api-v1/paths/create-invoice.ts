@@ -2,10 +2,12 @@ import { Operation } from 'express-openapi';
 import fs from 'node:fs';
 import path from 'node:path';
 // import { jsPDF } from 'jspdf';
-import { EXAMPLE_INVOICE_DATA, createInvoice } from '../../utils/invoiceUtil';
+import { createInvoice } from '../../utils/invoiceUtil';
 import * as pdfjsLib from 'pdfjs-dist';
 
 import { createCanvas } from 'canvas';
+import { userSessionManager } from '../..';
+import { filterObject } from '../../utils/util';
 
 // consider making this pull data from database instead?
 
@@ -13,10 +15,23 @@ export const POST: Operation = [
 
     async (req, res) => {
 
-        console.log('create invoice request', req.body);
-        // res.status(201).send('good');
-        // return;
         try {
+
+            const session = userSessionManager.getSession(req.query[ 'session' ] as string);
+
+            if (!session) {
+
+                throw new Error('failed to get session');
+            
+            }
+
+            if (!req.body[ 'signature' ]) {
+
+                throw new Error('request body missing signature');
+            
+            }
+
+            session.data.signature = req.body[ 'signature' ];
 
             // console.log('current dir', path.resolve('.'));
 
@@ -32,8 +47,24 @@ export const POST: Operation = [
 
             const pdfPath = dir + '/' + 'invoice.pdf';
 
-            const invoiceData = req.body;
-
+            const invoiceData = filterObject(session.data, [ 
+                'name', 
+                'address',
+                'phone',
+                'city',
+                'source',
+                'date',
+                'vin', 
+                'year', 
+                'make',
+                'model',
+                'plate',
+                'mileage',
+                'fees',
+                'estimate',
+                'signature'
+            ]);
+            
             console.log('generating pdf');
 
             const doc = createInvoice(invoiceData);
@@ -91,52 +122,42 @@ export const POST: Operation = [
 POST.apiDoc = {
     description: 'create an invoice from given data',
 
+    parameters: [
+        {
+            required: true,
+            description: 'the session id',
+            in: 'query',
+            name: 'session',
+            schema: {
+                type: 'string'
+            }
+        }
+    ],
+
     requestBody: {
         description: 'data required to create the invoice',
         required: true,
         content: {
             'application/json': {
                 schema: {
-                    allOf: [
-                        {
-                            $ref: '#/components/schemas/VehicleInfo'
-                        },
-                        {
-                            $ref: '#/components/schemas/UserInfo'
-                        },
-                        {
-                            type: 'object',
-                            properties: {
-                                date: {
-                                    type: 'string'
-                                },
-                                estimate: {
+                    type: 'object',
+                    properties: {
+                        signature: {
+                            type: 'array',
+                            items: {
+                                type: 'array',
+                                items: {
                                     type: 'number'
-                                },
-                                signature: {
-                                    type: 'array',
-                                    items: {
-                                        type: 'array',
-                                        items: {
-                                            type: 'number'
-                                        }
-                                    }
                                 }
-                            },
-                            required: [
-                                'date',
-                                'estimate',
-                                'signature'
-                            ],
-                            example: {
-                                'date': '12-29-2023',
-                                'estimate': 150,
-                                'signature': [ [ 44.046875,27.5,46.046875,35.5,47.046875,38.5,48.046875,43.5,49.046875,46.5,50.046875,51.5,52.046875,54.5,53.046875,57.5,55.046875,61.5 ],[ 26.046875,47.5,33.046875,40.5,36.046875,38.5,39.046875,36.5,43.046875,33.5,47.046875,31.5,52.046875,29.5,56.046875,27.5,61.046875,25.5,64.046875,23.5 ],[ 58.046875,46.5,68.046875,45.5,71.046875,44.5,74.046875,43.5,77.046875,41.5,80.046875,38.5,79.046875,35.5,76.046875,33.5,73.046875,32.5,69.046875,33.5,66.046875,36.5,64.046875,40.5,62.046875,43.5,62.046875,48.5,64.046875,51.5,68.046875,51.5,72.046875,50.5,76.046875,50.5,79.046875,49.5,82.046875,47.5,86.046875,44.5 ],[ 102.046875,26.5,93.046875,27.5,89.046875,28.5,85.046875,31.5,83.046875,34.5,87.046875,36.5,93.046875,36.5,99.046875,36.5,103.046875,36.5,104.046875,39.5,104.046875,43.5,101.046875,44.5,96.046875,46.5,93.046875,47.5,90.046875,48.5,86.046875,51.5 ],[ 118.046875,19.5,120.046875,28.5,121.046875,31.5,122.046875,35.5,125.046875,52.5 ],[ 110.046875,33.5,119.046875,30.5,122.046875,29.5,125.046875,28.5,128.046875,27.5,133.046875,24.5,137.046875,23.5 ] ]
                             }
-                        },
+                        }
+                    },
+                    required: [
+                        'signature'
                     ],
-                    example: EXAMPLE_INVOICE_DATA,
-                    additionalProperties: true
+                    example: {
+                        'signature': [ [ 44.046875,27.5,46.046875,35.5,47.046875,38.5,48.046875,43.5,49.046875,46.5,50.046875,51.5,52.046875,54.5,53.046875,57.5,55.046875,61.5 ],[ 26.046875,47.5,33.046875,40.5,36.046875,38.5,39.046875,36.5,43.046875,33.5,47.046875,31.5,52.046875,29.5,56.046875,27.5,61.046875,25.5,64.046875,23.5 ],[ 58.046875,46.5,68.046875,45.5,71.046875,44.5,74.046875,43.5,77.046875,41.5,80.046875,38.5,79.046875,35.5,76.046875,33.5,73.046875,32.5,69.046875,33.5,66.046875,36.5,64.046875,40.5,62.046875,43.5,62.046875,48.5,64.046875,51.5,68.046875,51.5,72.046875,50.5,76.046875,50.5,79.046875,49.5,82.046875,47.5,86.046875,44.5 ],[ 102.046875,26.5,93.046875,27.5,89.046875,28.5,85.046875,31.5,83.046875,34.5,87.046875,36.5,93.046875,36.5,99.046875,36.5,103.046875,36.5,104.046875,39.5,104.046875,43.5,101.046875,44.5,96.046875,46.5,93.046875,47.5,90.046875,48.5,86.046875,51.5 ],[ 118.046875,19.5,120.046875,28.5,121.046875,31.5,122.046875,35.5,125.046875,52.5 ],[ 110.046875,33.5,119.046875,30.5,122.046875,29.5,125.046875,28.5,128.046875,27.5,133.046875,24.5,137.046875,23.5 ] ]
+                    }
                 }
             }
         }

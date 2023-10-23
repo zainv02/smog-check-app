@@ -1,8 +1,45 @@
 
 import { jsPDF } from 'jspdf';
-import { UserVehicleInfo } from '../types';
+import { Fee, UserVehicleInfo } from '../types';
 
 export interface InvoiceData extends UserVehicleInfo {
+    fees?: {label: string, amount: number}[]
+}
+
+export function calculateFees(data: {year: number | string}): Fee[] {
+
+    const fees: Fee[] = [];
+
+    const year = parseInt(`${data.year}`);
+
+    let inspectionFee: number = 0;
+    const certificateFee = 8.25;
+
+    if (year >= 2000) {
+
+        inspectionFee = 85;
+    
+    } else if (year >= 1996) {
+
+        inspectionFee = 120;
+    
+    } else {
+
+        inspectionFee = 150;
+    
+    }
+
+    fees.push({
+        label: 'Smog inspection',
+        amount: inspectionFee - certificateFee
+    });
+
+    fees.push({
+        label: 'Smog certificate (this fee goes to the state of California)',
+        amount: certificateFee
+    });
+
+    return fees;
 
 }
 

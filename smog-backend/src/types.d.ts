@@ -1,4 +1,8 @@
 
+export interface Fee {
+    label: string,
+    amount: number
+}
 
 export interface UserVehicleInfo {
     name?: string,
@@ -13,6 +17,7 @@ export interface UserVehicleInfo {
     plate?: string,
     mileage?: number,
     date?: string,
+    fees?: Fee[],
     estimate?: number,
     signature?: number[][]
 }
