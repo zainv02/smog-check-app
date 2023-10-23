@@ -108,6 +108,12 @@ export class SessionManager<TData> {
     
     }
 
+    getSession(id: string): Session<TData> | undefined {
+
+        return this._sessions.get(id);
+    
+    }
+
     /**
      * Frees a session
      * @param id the session id

@@ -29,7 +29,44 @@ interface UserInfoParams {
     state: string
 }
 
-export async function getUserInfo(params: UserInfoParams) {
+export async function createSession(params: UserInfoParams) {
+
+    if (!params) {
+
+        console.warn('createSession needs params!');
+        return;
+    
+    }
+
+    try {
+
+        const response = await axios.post(createServerUrl('/create-session'), {
+            plate: params.plate,
+            state: params.state
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'text/plain'
+            }
+        });
+
+        if (response.status !== 200) {
+
+            throw new Error('bad status');
+        
+        }
+
+        return response.data;
+    
+    } catch (error) {
+        
+        console.error('createSession error', error);
+
+    }
+
+}
+
+export async function getUserInfo(params: {session: string}) {
 
     if (!params) {
 
@@ -40,10 +77,52 @@ export async function getUserInfo(params: UserInfoParams) {
 
     try {
 
-        const response = await axios.post(createServerUrl('/user-info'), {
-            plate: params.plate,
-            state: params.state
-        }, {
+        const response = await axios.get(createServerUrl('/get-user-info'), {
+            params,
+            headers: {
+                // 'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        // console.log('getUserInfo response', response);
+
+        if (response.status !== 200) {
+
+            throw new Error('bad status');
+        
+        }
+
+        return response.data;
+    
+    } catch (error) {
+        
+        console.error('getUserInfo error', error);
+
+    }
+
+}
+
+export async function updateUserInfo(params: {session: string}, body: object) {
+
+    if (!params) {
+
+        console.warn('getUserInfo needs params!');
+        return;
+    
+    }
+
+    if (!body) {
+
+        console.warn('getUserInfo needs body!');
+        return;
+    
+    }
+
+    try {
+
+        const response = await axios.post(createServerUrl('/update-user-info'), body, {
+            params,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'

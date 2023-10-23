@@ -1,7 +1,6 @@
 
 
 export interface UserVehicleInfo {
-    id?: string,
     name?: string,
     address?: string,
     city?: string,
@@ -16,4 +15,9 @@ export interface UserVehicleInfo {
     date?: string,
     estimate?: number,
     signature?: number[][]
+}
+
+export interface UserSessionData extends UserVehicleInfo {
+    id?: string,
+    userState?: 'new' | 'old'
 }

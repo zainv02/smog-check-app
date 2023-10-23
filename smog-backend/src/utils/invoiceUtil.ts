@@ -2,7 +2,7 @@
 import { jsPDF } from 'jspdf';
 import { UserVehicleInfo } from '../types';
 
-export interface InvoiceData extends Omit<UserVehicleInfo, 'id'> {
+export interface InvoiceData extends UserVehicleInfo {
 
 }
 

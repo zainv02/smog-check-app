@@ -7,7 +7,7 @@ import { Form, InputField, SelectField } from '$components/Form';
 import { Title } from '$components/Header';
 import { Panel, Section } from '$components/Layout';
 import { LoadingDisplay } from '$components/LoadingDisplay';
-import { getUserInfo } from '$src/backendHook';
+import { createSession } from '$src/backendHook';
 import { states } from '$src/data/states';
 import { getFormFields } from '$src/utils/formUtils';
 
@@ -33,7 +33,7 @@ const LicensePlateInfo: Component = () => {
 
         const fields = getFormFields(e.currentTarget) as Record<string, string>;
 
-        const result = await getUserInfo({
+        const result = await createSession({
             plate: fields.plate,
             state: fields.state
         });
@@ -43,11 +43,11 @@ const LicensePlateInfo: Component = () => {
             console.log('success with result', result);
             console.log('going to user-info page');
 
-            navigate('/user-info' + `?${new URLSearchParams(result)}`);
+            navigate('/user-info' + `?${new URLSearchParams({ session: result })}`);
         
         } else {
 
-            console.error('failed to get user info');
+            console.error('failed to create session');
             setSubmitError('Couldn\'t find the requested vehicle information. Check that the license plate and state are correct.');
 
         }

@@ -6,7 +6,8 @@ import path from 'path';
 import * as http from 'node:http';
 import { stop as stopDatabase } from './utils/databaseUtil';
 import { SessionManager } from './sessionManager';
-import { UserVehicleInfo } from './types';
+import { UserSessionData } from './types';
+import cors from 'cors';
 
 // https://github.com/ajv-validator/ajv/issues/2132
 // const Ajv = _Ajv as unknown as typeof _Ajv.default; 
@@ -26,6 +27,8 @@ app.use(express.json());
 
 // app.use(cors());
 
+// preflight cors for all api paths
+app.options('/api-v1/*', cors());
 
 
 initialize({
@@ -43,8 +46,8 @@ export const userSessionManager = new SessionManager(
     () => {
 
         return {
-            id: ''
-        } as UserVehicleInfo;
+            id: '',
+        } satisfies UserSessionData as UserSessionData;
     
     }
 );
