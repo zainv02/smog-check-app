@@ -9,7 +9,7 @@ export const Section: ParentComponent<{class?: string} & Omit<JSX.HTMLElementTag
     const spreadProps = usePropFilter(props, [ 'class' ]);
 
     return (
-        <section class={twMerge('mt-8 flex w-screen flex-col items-center [&>*]:max-w-screen-sm', props.class)} {...spreadProps()}>
+        <section class={twMerge('mt-8 flex w-full flex-col items-center [&>*]:max-w-screen-sm', props.class)} {...spreadProps()}>
             {props.children}
         </section>
     );

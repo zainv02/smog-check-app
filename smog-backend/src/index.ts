@@ -47,6 +47,7 @@ export const userSessionManager = new SessionManager(
 
         return {
             id: '',
+            invoice: {},
         } satisfies UserSessionData as UserSessionData;
     
     }

@@ -8,11 +8,14 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { createCanvas } from 'canvas';
 import { userSessionManager } from '../..';
 import { filterObject } from '../../utils/util';
+import jsPDF from 'jspdf';
+
+import cors from 'cors';
 
 // consider making this pull data from database instead?
 
 export const POST: Operation = [
-
+    cors(),
     async (req, res) => {
 
         try {
@@ -65,21 +68,30 @@ export const POST: Operation = [
                 'signature'
             ]);
             
-            console.log('generating pdf');
+            let doc: jsPDF;
 
-            const doc = createInvoice(invoiceData);
+            try {
 
-            console.log('generated pdf, saving');
+                console.log('generating pdf');
 
-            doc.save(pdfPath);
+                doc = createInvoice(invoiceData);
 
-            console.log('saved to', pdfPath);
+                console.log('generated pdf, saving');
 
-            if (req.headers.accept === 'application.pdf') {
+                doc.save(pdfPath);
 
-                res.status(200).sendFile(pdfPath);
+                console.log('saved to', pdfPath);
+
+                session.data.invoice!.pdfPath = pdfPath;
             
-            } else {
+            } catch (error) {
+
+                throw new Error(`failed to create invoice pdf - ${error}`);
+            
+            }
+            // res.status(200).sendFile(pdfPath);
+
+            try {
 
                 console.log('generating image');
 
@@ -103,9 +115,19 @@ export const POST: Operation = [
 
                 const imageDataUrl = canvas.toDataURL('image/jpeg');
 
-                res.status(200).send(imageDataUrl);
+                session.data.invoice!.imageDataUrl = imageDataUrl;
 
+                console.log('genereted image');
+            
+            } catch (error) {
+                
+                console.error(`failed to create invoice image - ${error}`);
+            
             }
+
+            // res.status(200).send(imageDataUrl);
+
+            res.status(200).send('success');
         
         } catch (error) {
 
@@ -167,23 +189,18 @@ POST.apiDoc = {
         200: {
             description: 'an invoice as a pdf',
             content: {
-                'application/pdf': {
-                    schema: {
-                        type: 'string',
-                        format: 'binary'
-                    }
-                },
-                'image/jpeg': {
-                    schema: {
-                        type: 'string',
-                        format: 'binary'
-                    }
-                }
-            }
-        },
-        201: {
-            description: 'testing for error',
-            content: {
+                // 'application/pdf': {
+                //     schema: {
+                //         type: 'string',
+                //         format: 'binary'
+                //     }
+                // },
+                // 'image/jpeg': {
+                //     schema: {
+                //         type: 'string',
+                //         // format: 'binary'
+                //     }
+                // },
                 'text/plain': {
                     schema: {
                         type: 'string'

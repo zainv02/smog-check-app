@@ -29,6 +29,8 @@ import { userSessionManager } from '../..';
 // import { UserVehicleInfo } from '../../types';
 import { filterObject } from '../../utils/util';
 import cors from 'cors';
+import { calculateFees } from '../../utils/invoiceUtil';
+import { Fee } from '../../types';
 
 
 function createResponseBody(obj: object): object {
@@ -84,6 +86,7 @@ export const GET: Operation = [
 
             const vin = session.data.vin!;
 
+            // get mileage
             if (session.data.mileage === undefined) {
             
                 const vehicleData = await getVehicleData(vin);
@@ -95,15 +98,22 @@ export const GET: Operation = [
                 }
 
                 session.data.mileage = vehicleData[ 'economy' ][ 'mpg_combined' ];
+            
+            }
 
-                // Object.assign(session.data, {
-                //     vin: vinData[ 'vin' ],
-                //     year: vinData[ 'year' ],
-                //     make: vinData[ 'make' ],
-                //     model: vinData[ 'model' ],
-                //     plate: req.body[ 'plate' ],
-                //     mileage: vehicleData[ 'economy' ][ 'mpg_combined' ],
-                // });
+            // calculate fees
+            if (session.data.fees === undefined) {
+
+                const year = parseInt(`${session.data.year}`);
+
+                if (isNaN(year)) {
+
+                    throw new Error(`given year [${session.data.year}] is not a number`);
+                
+                }
+
+                const fees: Fee[] = calculateFees({ year });
+                session.data.fees = fees;
             
             }
 

@@ -9,23 +9,55 @@ export const GET: Operation = [
     async (req, res) => {
 
         try {
+
+            // if session is supplied, return the fees from the session year
+            if (req.query[ 'session' ]) {
+
+                const session = userSessionManager.getSession(req.query[ 'session' ] as string);
+
+                if (!session) {
+
+                    throw new Error('failed to get session');
+                
+                }
+                
+                if (session.data.fees === undefined) {
+
+                    if (!session.data.year) {
+
+                        throw new Error('session does not have required information such as year');
+                    
+                    }
+
+                    const fees: Fee[] = calculateFees({ year: session.data.year! });
+                    session.data.fees = fees;
+
+                    res.status(200).send(fees);
+                
+                } else {
+
+                    res.status(200).send(session.data.fees);
+                
+                }
             
-            const session = userSessionManager.getSession(req.query[ 'session' ] as string);
+            } else if (req.query[ 'year' ]) {
 
-            if (!session) {
+                const year = parseInt(req.query[ 'year' ].toString());
 
-                throw new Error('failed to get session');
+                if (isNaN(year)) {
+
+                    throw new Error(`given year [${req.query[ 'year' ]}] is not a number`);
+                
+                }
+
+                const fees: Fee[] = calculateFees({ year });
+                res.status(200).send(fees);
+
+            } else {
+
+                throw new Error('missing session or data (year)');
             
             }
-
-            if (session.data.fees === undefined) {
-
-                const fees: Fee[] = calculateFees({ year: session.data.year! });
-                session.data.fees = fees;
-            
-            }
-
-            res.status(200).send(session.data.fees);
 
         } catch (error) {
             
@@ -41,13 +73,30 @@ GET.apiDoc = {
 
     parameters: [
         {
-            required: true,
+            required: false,
             description: 'the session id',
             in: 'query',
             name: 'session',
             schema: {
                 type: 'string'
             }
+        },
+        {
+            required: false,
+            description: 'the year of the vehicle',
+            in: 'query',
+            name: 'year',
+            schema: {
+                oneOf: [
+                    {
+                        type: 'string'
+                    },
+                    {
+                        type: 'number'
+                    }
+                ]
+            },
+            example: 1998
         }
     ],
 

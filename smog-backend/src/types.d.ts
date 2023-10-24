@@ -24,5 +24,10 @@ export interface UserVehicleInfo {
 
 export interface UserSessionData extends UserVehicleInfo {
     id?: string,
-    userState?: 'new' | 'old'
+    userState?: 'new' | 'old',
+    invoice?: {
+        imageDataUrl?: string,
+        pdfPath?: string,
+        pdfDataUrl?: string
+    }
 }

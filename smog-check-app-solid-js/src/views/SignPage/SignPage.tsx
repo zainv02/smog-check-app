@@ -1,15 +1,15 @@
-import { useSearchParams } from '@solidjs/router';
+import { useNavigate, useSearchParams } from '@solidjs/router';
 // import base64 from 'base-64';
 // import PDFObject from 'pdfobject';
-import { Component, JSX, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, JSX, createSignal, onCleanup, onMount, For, createEffect } from 'solid-js';
 // import utf8 from 'utf8';
 
-import { Button, ButtonStyles, SubmitButton } from '$components/Button';
+import { Button, ButtonStyles, LinkButton, SubmitButton } from '$components/Button';
 import { Form } from '$components/Form';
 import { Title } from '$components/Header';
 import { Panel, Section } from '$components/Layout';
 import { LoadingDisplay } from '$components/LoadingDisplay';
-import { getInvoice } from '$src/backendHook';
+import { createInvoice, getEstimate } from '$src/backendHook';
 
 
 type CanvasPosition = [number, number];
@@ -23,13 +23,26 @@ const SignPage: Component = () => {
     const [ signed, setSigned ] = createSignal(false);
     const [ canvasSize, setCanvasSize ] = createSignal<[number, number]>([ 0, 0 ]);
     const [ searchParams ] = useSearchParams();
+    const [ loading, setLoading ] = createSignal<boolean>(false);
+    const [ fees, setFees ] = createSignal<{label: string, amount: number}[]>([]);
+    const [ estimate, setEstimate ] = createSignal<number>(0);
+    const [ error, setError ] = createSignal(undefined);
+    const navigate = useNavigate();
     // const [ pdfSrc, setPdfSrc ] = createSignal('');
 
     let canvas: HTMLCanvasElement;
     let ctx: CanvasRenderingContext2D;
     let resizeObserver: ResizeObserver;
+    
+    createEffect(() => {
 
-    onMount(() => {
+        let feeTotal = 0;
+        fees().forEach(({ amount }) => feeTotal += amount);
+        setEstimate(feeTotal);
+    
+    });
+
+    onMount(async () => {
 
         resizeObserver = new ResizeObserver((entries) => {
 
@@ -54,6 +67,22 @@ const SignPage: Component = () => {
 
         window.addEventListener('touchend', handleDrawEnd);
         window.addEventListener('mouseup', handleDrawEnd);
+
+        setLoading(true);
+
+        const result = await getEstimate({ session: searchParams[ 'session' ] });
+
+        if (!result) {
+            
+            console.error('failed to get estimate');
+            setError('Failed to get an estimate');
+            setLoading(false);
+            return;
+        
+        }
+
+        setFees(result);
+        setLoading(false);
     
     });
 
@@ -157,25 +186,12 @@ const SignPage: Component = () => {
         // console.log(lines.map(line => `[${line.toString()}]`).join(','), canvasSize());
 
         const data = {
-            name: searchParams[ 'name' ],
-            address: searchParams[ 'address' ],
-            phone: searchParams[ 'phone' ],
-            city: searchParams[ 'city' ],
-            source: searchParams[ 'source' ],
-            vin: searchParams[ 'vin' ],
-            year: searchParams[ 'year' ],
-            make: searchParams[ 'make' ],
-            model: searchParams[ 'model' ],
-            plate: searchParams[ 'plate' ],
-            mileage: searchParams[ 'mileage' ],
-            date: searchParams[ 'date' ],
-            estimate: 145.2,
             signature: lines
         };
 
         console.log('using this data:', data);
 
-        const result = await getInvoice(data);
+        const result = await createInvoice({ session: searchParams[ 'session' ] }, data);
 
         if (result) {
 
@@ -187,11 +203,11 @@ const SignPage: Component = () => {
             // setPdfSrc(dataUrl);
             // PDFObject.embed(dataUrl, '#pdfobject');
 
-            // navigate('/user-info' + `?${new URLSearchParams(result)}`);
+            navigate('/invoice' + `?${new URLSearchParams({ session: searchParams[ 'session' ] })}`);
         
         } else {
 
-            console.error('failed to get invoice');
+            console.error('failed to create invoice');
             // setSubmitError('Couldn\'t find the requested vehicle information. Check that the license plate and state are correct.');
 
         }
@@ -206,7 +222,14 @@ const SignPage: Component = () => {
             <Panel class='relative'>
                 <Title>Confirm Estimate</Title>
                 <Form onSubmit={handleSubmit} class='w-full'>
-                    <p class='text-center text-4xl'>${Number.parseFloat(`${200}`).toFixed(2)}</p>
+                    <For each={fees()}>{({ label, amount }) => 
+                        <div class='flex flex-row items-end justify-between border-b-[1px] border-b-gray-600 pb-1'>
+                            <p class='max-w-[70%]'>{label}</p>
+                            <p class='text-right'>${amount.toFixed(2)}</p>
+                        </div>
+                    }</For>
+                    <p class='text-center'>Total:</p>
+                    <p class='text-center text-4xl'>${estimate().toFixed(2)}</p>
                     <p class='text-center'>Sign in the box below:</p>
                     <div class='h-20 w-full rounded outline outline-1 outline-gray-400'>
                         <canvas 
@@ -262,7 +285,13 @@ const SignPage: Component = () => {
                         <SubmitButton buttonStyle={ButtonStyles.PRIMARY} disabled={submitting() || !signed()}>Confirm</SubmitButton>
                     </div>
                 </Form>
-                {submitting() && <LoadingDisplay />}
+                {submitting() || loading() && <LoadingDisplay />}
+                {
+                    error() && <div class='absolute left-0 top-0 flex h-full w-full flex-col items-center justify-center bg-white'>
+                        <p class='text-red-500'>{error()}</p>
+                        <LinkButton href='/'>Restart</LinkButton>
+                    </div>
+                }
             </Panel>
             {/* <div id='pdfobject' class='h-[400px] w-[500px]' /> */}
             {/* <embed src={pdfSrc()} type='application/pdf' width={500} height={400} class='outline outline-red-500' /> */}

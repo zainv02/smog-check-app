@@ -147,6 +147,82 @@ export async function updateUserInfo(params: {session: string}, body: object) {
 
 }
 
+export interface GetEstimateParams {
+    session?: string,
+    year?: number | string,
+}
+
+export async function getEstimate(params: GetEstimateParams) {
+
+    if (!params) {
+
+        console.warn('getEstimate needs params!');
+        return;
+    
+    }
+
+    try {
+
+        const response = await axios.get(createServerUrl('/get-estimate'), {
+            params,
+            headers: {
+                // 'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        if (response.status !== 200) {
+
+            throw new Error(`bad status [${response.data}]`);
+        
+        }
+
+        return response.data;
+    
+    } catch (error) {
+        
+        console.error('getEstimate error', error);
+
+    }
+
+}
+
+export interface CreateInvoiceData {
+    signature: number[][]
+}
+
+export async function createInvoice(params: {session: string}, data: CreateInvoiceData) {
+
+    try {
+
+        const response = await axios.post(
+            createServerUrl('/create-invoice'), 
+            data, 
+            {
+                params,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/plain'
+                }
+            }
+        );
+
+        if (response.status !== 200) {
+
+            throw new Error(`bad status ${response.data}`);
+        
+        }
+
+        return response.data;
+        
+    } catch (error) {
+
+        console.error('createInvoice error', error);
+    
+    }
+
+}
+
 export interface InvoiceData {
     name?: string,
     date?: string,
@@ -164,24 +240,24 @@ export interface InvoiceData {
     signature?: number[][]
 }
 
-export async function getInvoice(data: InvoiceData) {
+export async function getInvoice(params: {session: string}) {
 
-    if (!data) {
+    if (!params) {
 
-        console.warn('getInvoice needs data!');
+        console.warn('getInvoice needs params!');
         return;
     
     }
 
     try {
 
-        const response = await axios.post(
-            createServerUrl('/create-invoice'), 
-            data, 
+        const response = await axios.get(
+            createServerUrl('/get-invoice'),
             {
+                params,
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/pdf'
+                    // 'Content-Type': 'application/json',
+                    'Accept': 'image/jpeg'
                 }
             }
         );
