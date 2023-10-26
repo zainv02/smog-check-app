@@ -15,4 +15,5 @@ services:
 volumes:
   pgdata:
     name: "smog-data"
+    external: true
   
