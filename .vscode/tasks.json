@@ -6,7 +6,7 @@
             "label": "compile-server",
             "command": "npm run compile",
             "options": {
-                "cwd": "${workspaceFolder}/smog-backend"
+                "cwd": "${workspaceFolder}/backend"
             }
         }
     ]
