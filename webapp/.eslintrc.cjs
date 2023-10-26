@@ -5,7 +5,10 @@
  * 
  * 
  */
-
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const loadConfig = require('tailwindcss/loadConfig');
+const tailwindConfig = loadConfig(__dirname + '/tailwind.config.ts');
+// await import('jiti')(__filename)('./tailwind.config')
 module.exports = {
     'env': {
         'browser': true,
@@ -78,6 +81,25 @@ module.exports = {
             {
                 'argsIgnorePattern': '^_',
                 'varsIgnorePattern': '^_',
+            }
+        ],
+        
+        // tailwind
+        'tailwindcss/no-custom-classname': [
+            'warn',
+            {
+                'config': tailwindConfig,// './tailwind.config.ts',
+                'whitelist': [ ],
+            },
+        ],
+        // https://github.com/francoismassart/eslint-plugin-tailwindcss/blob/master/docs/rules/classnames-order.md
+        'tailwindcss/classnames-order': [ 'warn',
+            {
+                'callees': [], // string[]
+                'config': tailwindConfig,
+                'removeDuplicates': true,
+                'skipClassAttribute': false,
+                'tags': [], // string[] for tagged templates
             }
         ],
 
