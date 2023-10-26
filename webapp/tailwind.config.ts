@@ -9,7 +9,7 @@ const config: Config = {
     theme: {
         extend: {
             colors: {
-                'light-60': 'oklab(1 0 0)',
+                'light-60': 'oklab(1, 0, 0)',
                 'light-30': 'oklab(0.400, 0.000, -0.083)',
                 'light-10': 'oklab(0.900, 0.000, 0.167)'
             }
