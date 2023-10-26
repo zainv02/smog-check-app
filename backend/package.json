@@ -1,5 +1,5 @@
 {
-  "name": "smog-backend",
+  "name": "backend",
   "version": "1.0.0",
   "description": "backend for smog registration application",
   "main": "./src/index.js",

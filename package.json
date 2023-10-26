@@ -10,7 +10,7 @@
   "license": "ISC",
   "private": "true",
   "workspaces": [
-    "smog-backend",
-    "smog-check-app-solid-js"
+    "backend",
+    "webapp"
   ]
 }
