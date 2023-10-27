@@ -1,6 +1,10 @@
 import crypto from 'node:crypto';
 
 type OnFreeHandler<TData> = (data: TData) => (boolean | Promise<boolean>)
+interface SessionOptions<TData> {
+    onFree?: OnFreeHandler<TData>,
+    id?: string
+}
 
 export class Session<TData> {
     
@@ -11,7 +15,7 @@ export class Session<TData> {
 
     public data: TData;
     
-    constructor(manager: SessionManager<TData>, data: TData, opts?: {onFree?: OnFreeHandler<TData>, id?: string}) {
+    constructor(manager: SessionManager<TData>, data: TData, opts?: SessionOptions<TData>) {
 
         this._manager = manager;
         this.data = data;
@@ -72,6 +76,12 @@ export class Session<TData> {
     
     }
 
+    toJSON() {
+
+        return this.data;
+    
+    }
+
 }
 
 
@@ -94,7 +104,7 @@ export class SessionManager<TData> {
      * @param initialData OPTIONAL: the initial data for the session. If undefined, the initialDataConstructor will be used to generate data
      * @returns a new session
      */
-    async createSession(initialData?: TData): Promise<Session<TData>> {
+    async createSession(initialData?: TData, opts?: SessionOptions<TData>): Promise<Session<TData>> {
 
         if (initialData === undefined) {
 
@@ -102,7 +112,7 @@ export class SessionManager<TData> {
         
         }
 
-        const session = new Session<TData>(this, initialData);
+        const session = new Session<TData>(this, initialData, opts);
         this._sessions.set(session.getId(), session);
         return session;
     
@@ -111,6 +121,32 @@ export class SessionManager<TData> {
     getSession(id: string): Session<TData> | undefined {
 
         return this._sessions.get(id);
+    
+    }
+
+    async loadSessionsFromJson(json: string) {
+
+        try {
+            
+            for (const [ sessionId, data ] of Object.entries(JSON.parse(json))) {
+
+                const session = await this.createSession(data as TData, { id: sessionId });
+                console.log(`loaded session [${sessionId}]`, session);
+                
+            }
+
+        } catch (error) {
+
+            console.error(`failed to load sessions from json - ${error}`);
+            return false;
+        
+        }
+    
+    }
+
+    entries() {
+
+        return this._sessions.entries();
     
     }
 
@@ -156,6 +192,12 @@ export class SessionManager<TData> {
         }
 
         return anyFreed;
+    
+    }
+
+    toJSON() {
+
+        return Object.fromEntries(this._sessions);
     
     }
 
