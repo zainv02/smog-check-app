@@ -9,7 +9,7 @@ export const Section: ParentComponent<{class?: string} & Omit<JSX.HTMLElementTag
     const spreadProps = usePropFilter(props, [ 'class' ]);
 
     return (
-        <section class={twMerge('mt-8 flex w-full flex-col items-center [&>*]:max-w-screen-sm', props.class)} {...spreadProps()}>
+        <section class={twMerge('flex w-full flex-col items-center [&>*]:max-w-screen-sm', props.class)} {...spreadProps()}>
             {props.children}
         </section>
     );
@@ -21,7 +21,7 @@ export const Panel: ParentComponent<{class?: string} & Omit<JSX.HTMLElementTags[
     const spreadProps = usePropFilter(props, [ 'class' ]);
 
     return (
-        <div class={twMerge('m-4 rounded p-8 shadow-lg outline outline-1 outline-gray-300 flex flex-col items-center justify-start', props.class)} {...spreadProps()}>
+        <div class={twMerge('rounded p-8 shadow-lg outline outline-1 outline-gray-300 flex flex-col items-center justify-start', props.class)} {...spreadProps()}>
             {props.children}
         </div>
     );

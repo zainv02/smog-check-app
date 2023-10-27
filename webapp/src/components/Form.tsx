@@ -323,7 +323,7 @@ export const InputField: Component<InputFieldProps> = (props) => {
 
                 }}
 
-                class={'h-full w-full rounded px-2 py-1 outline outline-1 invalid:outline invalid:outline-2 invalid:outline-red-500'} 
+                class={twMerge('h-full w-full rounded px-2 py-1 outline outline-1 invalid:outline invalid:outline-2 invalid:outline-red-500', props.class)} 
 
                 {...spreadProps()} 
             />
