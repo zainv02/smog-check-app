@@ -17,6 +17,7 @@
     "paths": {
       "$components/*": ["./src/components/*"],
       "$src/*": ["./src/*"],
+      "$shared/*": ["../shared/*"]
     },
   },
 }
