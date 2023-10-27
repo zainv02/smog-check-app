@@ -163,7 +163,7 @@ export function createInvoice(data: InvoiceData): jsPDF {
     const signatureLabelWidth = doc.getTextWidth('SIGNATURE');
     const signatureStart = signatureLabelWidth + 20;
     const signatureHeight = 90;
-    const signatureScale = .7;
+    const signatureScale = .6;
     doc.line(...paddedPos(signatureStart, signatureBottom), ...paddedPos(paddedPageWidth, signatureBottom));
 
     doc.setFontSize(16);
