@@ -66,6 +66,34 @@ export async function createSession(params: UserInfoParams) {
 
 }
 
+export async function checkSession(params: { session: string }) {
+
+    try {
+
+        const response = await axios.get(createServerUrl('/check-session'), {
+            params,
+            headers: {
+            // 'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        if (response.status !== 200) {
+
+            throw new Error(`bad status - ${response.data}`);
+    
+        }
+
+        return response.data;
+
+    } catch (error) {
+
+        console.error('failed to validate session', error);
+
+    }
+
+}
+
 export async function getUserInfo(params: {session: string}) {
 
     if (!params) {
