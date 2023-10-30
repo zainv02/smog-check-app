@@ -1,4 +1,9 @@
 import axios from 'axios';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const authToken = process.env.PLATE_TO_VIN_API_TOKEN
 
 export async function getVinData(plate: string, state: string) {
 
@@ -7,7 +12,7 @@ export async function getVinData(plate: string, state: string) {
     );
     
     const headers = {
-        'Authorization': 'THjzMgUEzJxG4eJ',
+        'Authorization': authToken,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
     };
@@ -43,7 +48,7 @@ export async function getVehicleData(vin: string) {
     );
 
     const headers = {
-        'Authorization': 'THjzMgUEzJxG4eJ',
+        'Authorization': authToken,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
     };
