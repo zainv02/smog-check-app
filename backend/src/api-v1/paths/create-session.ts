@@ -108,14 +108,7 @@ POST.apiDoc = {
             }
         },
         default: {
-            description: 'An error occurred',
-            content: {
-                'text/plain': {
-                    schema: {
-                        type: 'string'
-                    }
-                }
-            }
+            $ref: '#/components/responses/Error'
         }
     }
 };
