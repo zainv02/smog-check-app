@@ -7,7 +7,6 @@ import { Form, InputField, SelectField } from '$components/Form';
 import { Title } from '$components/Header';
 import { createSession } from '$src/backendHook';
 import { useLoadingState } from '$src/contexts/loadingState';
-import { useSessionState } from '$src/contexts/sessionState';
 import { states } from '$src/data/states';
 import { RouteComponentProps } from '$src/types';
 import { getFormFields } from '$src/utils/formUtils';
@@ -19,7 +18,6 @@ const LicensePlateInfo: Component<RouteComponentProps> = () => {
 
     const [ submitError, setSubmitError ] = createSignal('');
     const [ submitting, setSubmitting ] = createSignal(false);
-    const { setSession } = useSessionState();
     const navigate = useNavigate();
 
     const handleSubmit: JSX.HTMLElementTags['form']['onSubmit'] = async (e) => {
@@ -45,8 +43,6 @@ const LicensePlateInfo: Component<RouteComponentProps> = () => {
 
             console.log('success with result', result);
             console.log('going to user-info page');
-
-            setSession(result as string);
 
             navigate('/user-info' + `?${new URLSearchParams({ session: result as string })}`);
         
