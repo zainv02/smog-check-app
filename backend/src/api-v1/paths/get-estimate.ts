@@ -1,26 +1,23 @@
 import { Operation } from 'express-openapi';
 import cors from 'cors';
-import { userSessionManager } from '../..';
-import { Fee } from '../../types';
+import { Fee, UserSessionData } from '../../types';
 import { calculateFees } from '../../utils/invoiceUtil';
+import { checkSession, sessionParameters } from '../middleware/checkSession';
+import { Session } from '../../sessionManager';
 
 export const GET: Operation = [
     cors(),
+    checkSession({ noError: true }),
     async (req, res) => {
 
         try {
 
             // if session is supplied, return the fees from the session year
-            if (req.query[ 'session' ]) {
+            if (res.locals.session) {
 
-                const session = userSessionManager.getSession(req.query[ 'session' ] as string);
-
-                if (!session) {
-
-                    throw new Error('failed to get session');
+                const session = res.locals.session as Session<UserSessionData>;
                 
-                }
-                
+                // calculate fees
                 if (session.data.fees === undefined) {
 
                     if (!session.data.year) {
@@ -31,14 +28,24 @@ export const GET: Operation = [
 
                     const fees: Fee[] = calculateFees({ year: session.data.year! });
                     session.data.fees = fees;
-
-                    res.status(200).send(fees);
-                
-                } else {
-
-                    res.status(200).send(session.data.fees);
                 
                 }
+
+                // calculate estimate
+                if (session.data.estimate === undefined) {
+
+                    let estimate = 0;
+                    session.data.fees.forEach(({ amount }) => {
+
+                        estimate += amount;
+                    
+                    });
+                    session.data.estimate = estimate;
+                
+                }
+
+                res.status(200).send(session.data.fees);
+
             
             } else if (req.query[ 'year' ]) {
 
@@ -72,15 +79,7 @@ GET.apiDoc = {
     description: 'gets a list of fees that should add up to the estimate based on the vehicle info',
 
     parameters: [
-        {
-            required: false,
-            description: 'the session id',
-            in: 'query',
-            name: 'session',
-            schema: {
-                type: 'string'
-            }
-        },
+        ...sessionParameters({ optional: true }),
         {
             required: false,
             description: 'the year of the vehicle',
@@ -136,15 +135,7 @@ GET.apiDoc = {
             }
         },
         default: {
-            description: 'an error occurred',
-            content: {
-                'text/plain': {
-                    schema: {
-                        type: 'string'
-                    }
-                }
-            }
-            
+            $ref: '#/components/responses/Error'
         }
     }
 };
