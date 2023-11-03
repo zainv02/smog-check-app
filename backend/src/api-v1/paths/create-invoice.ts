@@ -1,32 +1,30 @@
 import { Operation } from 'express-openapi';
 import fs from 'node:fs';
 import path from 'node:path';
-// import { jsPDF } from 'jspdf';
 import { createInvoice } from '../../utils/invoiceUtil';
 import * as pdfjsLib from 'pdfjs-dist';
 
 import { createCanvas } from 'canvas';
-import { userSessionManager } from '../..';
 import { filterObject } from '../../utils/util';
 import jsPDF from 'jspdf';
 
 import cors from 'cors';
+import { checkSession, sessionParameters } from '../middleware/checkSession';
+import { UserSessionData } from '../../types';
+import { Session } from '../../sessionManager';
 
 // consider making this pull data from database instead?
 
+export const INVOICE_DIRECTORY = path.resolve(__dirname + '/../../../temp');
+
 export const POST: Operation = [
     cors(),
+    checkSession(),
     async (req, res) => {
 
         try {
 
-            const session = userSessionManager.getSession(req.query[ 'session' ] as string);
-
-            if (!session) {
-
-                throw new Error('failed to get session');
-            
-            }
+            const session = res.locals.session as Session<UserSessionData>;
 
             if (!req.body[ 'signature' ]) {
 
@@ -37,8 +35,7 @@ export const POST: Operation = [
             session.data.signature = req.body[ 'signature' ];
 
             // console.log('current dir', path.resolve('.'));
-
-            const dir = path.resolve(__dirname + '/../../../temp');
+            const dir = INVOICE_DIRECTORY;
 
             console.log('saving pdfs to: ', dir);
     
@@ -48,7 +45,9 @@ export const POST: Operation = [
         
             }
 
-            const pdfPath = dir + '/' + 'invoice.pdf';
+            const pdfPath = dir + '/' + `invoice-${session.getId()}.pdf`;
+
+            // console.log('prefiltered data', session.data);
 
             const invoiceData = filterObject(session.data, [ 
                 'name', 
@@ -72,7 +71,7 @@ export const POST: Operation = [
 
             try {
 
-                console.log('generating pdf');
+                console.log('generating pdf with data', invoiceData);
 
                 doc = createInvoice(invoiceData);
 
@@ -145,15 +144,7 @@ POST.apiDoc = {
     description: 'create an invoice from given data',
 
     parameters: [
-        {
-            required: true,
-            description: 'the session id',
-            in: 'query',
-            name: 'session',
-            schema: {
-                type: 'string'
-            }
-        }
+        ...sessionParameters()
     ],
 
     requestBody: {
@@ -209,14 +200,7 @@ POST.apiDoc = {
             }
         },
         default: {
-            description: 'An error occurred',
-            content: {
-                'text/plain': {
-                    schema: {
-                        type: 'string'
-                    }
-                }
-            }
+            $ref: '#/components/responses/Error'
         }
     }
     

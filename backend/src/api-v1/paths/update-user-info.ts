@@ -1,23 +1,20 @@
 import { Operation } from 'express-openapi';
 import cors from 'cors';
-import { userSessionManager } from '../..';
 import { filterObject } from '../../utils/util';
+import { checkSession, sessionParameters } from '../middleware/checkSession';
+import { Session } from '../../sessionManager';
+import { UserSessionData } from '../../types';
 
 
 
 export const POST: Operation = [
     cors(),
+    checkSession(),
     async (req, res) => {
         
         try {
 
-            const session = userSessionManager.getSession(req.query[ 'session' ] as string);
-
-            if (!session) {
-
-                throw new Error('failed to get session');
-            
-            }
+            const session = res.locals.session as Session<UserSessionData>;
             
             const data = req.body || {};
 
@@ -42,15 +39,7 @@ POST.apiDoc = {
     description: 'update the user info',
 
     parameters: [
-        {
-            required: true,
-            description: 'the session id',
-            in: 'query',
-            name: 'session',
-            schema: {
-                type: 'string'
-            }
-        }
+        ...sessionParameters()
     ],
 
     requestBody: {
@@ -78,14 +67,7 @@ POST.apiDoc = {
             }
         },
         default: {
-            description: 'an error occurred',
-            content: {
-                'text/plain': {
-                    schema: {
-                        type: 'string'
-                    }
-                }
-            }
+            $ref: '#/components/responses/Error'
         }
     }
 };

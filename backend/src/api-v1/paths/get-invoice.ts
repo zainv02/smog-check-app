@@ -1,27 +1,18 @@
 import { Operation } from 'express-openapi';
 import cors from 'cors';
-import { userSessionManager } from '../..';
+import { checkSession, sessionParameters } from '../middleware/checkSession';
+import { Session } from '../../sessionManager';
+import { UserSessionData } from '../../types';
 
 
 export const GET: Operation = [
     cors(),
+    checkSession(),
     async (req, res) => {
 
         try {
-        
-            if (!req.query[ 'session' ]) {
 
-                throw new Error('session missing from query');
-            
-            }
-
-            const session = userSessionManager.getSession(req.query[ 'session' ] as string);
-
-            if (!session) {
-
-                throw new Error('failed to get session');
-            
-            }
+            const session = res.locals.session as Session<UserSessionData>;
 
             if (req.accepts('image/jpeg')) {
                 
@@ -77,14 +68,7 @@ GET.apiDoc = {
     description: 'get a created invoice',
     
     parameters: [
-        {
-            required: false,
-            in: 'query',
-            name: 'session',
-            schema: {
-                type: 'string'
-            }
-        }
+        ...sessionParameters()
     ],
 
     responses: {
@@ -105,14 +89,7 @@ GET.apiDoc = {
             }
         },
         default: {
-            description: 'an error occurred',
-            content: {
-                'text/plain': {
-                    schema: {
-                        type: 'string'
-                    }
-                }
-            }
+            $ref: '#/components/responses/Error'
         }
     }
 };

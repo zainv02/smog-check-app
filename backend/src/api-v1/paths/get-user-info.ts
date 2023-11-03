@@ -25,12 +25,12 @@ customer result: [
 import { query } from '../../utils/databaseUtil';
 import { getVehicleData } from '../../utils/vehicleInfoUtil';
 import { Operation } from 'express-openapi';
-import { userSessionManager } from '../..';
-// import { UserVehicleInfo } from '../../types';
 import { filterObject } from '../../utils/util';
 import cors from 'cors';
 import { calculateFees } from '../../utils/invoiceUtil';
-import { Fee } from '../../types';
+import { Fee, UserSessionData } from '../../types';
+import { checkSession, sessionParameters } from '../middleware/checkSession';
+import { Session } from '../../sessionManager';
 
 
 function createResponseBody(obj: object): object {
@@ -56,33 +56,12 @@ function createResponseBody(obj: object): object {
 
 export const GET: Operation = [
     cors(),
+    checkSession(),
     async (req, res) => {
     
         try {
 
-            // to be filled with stuff
-            // const userVehicleInfo: UserVehicleInfo = {};
-
-            // // get vehicle data
-            // // either from vin api or from stored info for customer
-            // const vinData = await getVinData(req.body[ 'plate' ], req.body[ 'state' ]);
-    
-            // if (!vinData) {
-    
-            //     res.status(400).send('POST request error - failed to get vin data');
-            //     return;
-        
-            // }
-    
-            //  in here consider looking into customer info
-
-            const session = userSessionManager.getSession(req.query[ 'session' ] as string);
-            
-            if (!session) {
-
-                throw new Error('failed to get session');
-            
-            }
+            const session = res.locals.session as Session<UserSessionData>;
 
             const vin = session.data.vin!;
 
@@ -194,15 +173,7 @@ GET.apiDoc = {
     description: 'get customer data from plate, state, and name if it exists, otherwise only what is available',
 
     parameters: [
-        {
-            required: true,
-            description: 'the session id',
-            in: 'query',
-            name: 'session',
-            schema: {
-                type: 'string'
-            }
-        }
+        ...sessionParameters()
     ],
 
     responses: {
@@ -238,14 +209,7 @@ GET.apiDoc = {
             
         },
         default: {
-            description: 'An error occurred',
-            content: {
-                'text/plain': {
-                    schema: {
-                        type: 'string'
-                    }
-                }
-            }
+            $ref: '#/components/responses/Error'
         }
     }
 };

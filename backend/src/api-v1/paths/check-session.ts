@@ -1,28 +1,13 @@
 import { Operation } from 'express-openapi';
 import cors from 'cors';
-import { userSessionManager } from '../..';
+import { checkSession, sessionParameters } from '../middleware/checkSession';
 
 export const GET: Operation = [
     cors(),
+    checkSession(),
     async (req, res) => {
 
-        try {
-            
-            const session = userSessionManager.getSession(req.query[ 'session' ] as string);
-
-            if (!session) {
-
-                throw new Error(`session [${req.query[ 'session' ]}] not found`);
-            
-            }
-
-            res.status(200).send('found session');
-
-        } catch (error) {
-            
-            res.status(400).send(`GET request error - ${error}`);
-
-        }
+        res.status(200).send('found session');
     
     }
 ];
@@ -31,14 +16,7 @@ GET.apiDoc = {
     description: 'check if session is valid',
     
     parameters: [
-        {
-            required: true,
-            in: 'query',
-            name: 'session',
-            schema: {
-                type: 'string'
-            }
-        }
+        ...sessionParameters()
     ],
 
     responses: {
@@ -53,14 +31,7 @@ GET.apiDoc = {
             }
         },
         default: {
-            description: 'an error occurred',
-            content: {
-                'text/plain': {
-                    schema: {
-                        type: 'string'
-                    }
-                }
-            }
+            $ref: '#/components/responses/Error'
         }
     }
 };
