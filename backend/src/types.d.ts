@@ -10,6 +10,7 @@ export interface UserVehicleInfo {
     city?: string,
     phone?: string,
     source?: string,
+    email?: string,
     vin?: string,
     year?: number,
     make?: string,
