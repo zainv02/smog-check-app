@@ -96,9 +96,59 @@ const apiDoc: OpenAPIV3.Document = {
                     'source':'Source',
                 }
             }
+        },
+        responses: {
+            Error: {
+                description: 'an error occured',
+                content: {
+                    'text/plain': {
+                        schema: {
+                            type: 'string',
+                        }
+                    }
+                }
+            }
         }
     },
     paths: {}
 };
   
 export default apiDoc;
+
+export const errorResponses: OpenAPIV3.OperationObject['responses'] = {
+    
+    400: {
+        description: 'bad request',
+        content: {
+            'text/plain': {
+                schema: {
+                    type: 'string'
+                }
+            }
+        }
+    },
+    401: {
+        description: 'session authentication error',
+        content: {
+            'text/plain': {
+                schema: {
+                    type: 'string'
+                }
+            }
+        }
+    },
+    500: {
+        $ref: '#/components/responses/Error'
+    },
+    default: {
+        $ref: '#/components/responses/Error'
+        // description: 'an error occurred',
+        // content: {
+        //     'text/plain': {
+        //         schema: {
+        //             type: 'string'
+        //         }
+        //     }
+        // }
+    }
+};
