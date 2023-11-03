@@ -1,5 +1,5 @@
-import { useNavigate, useSearchParams } from '@solidjs/router';
-import { Component, JSX, createEffect, createSignal, onMount } from 'solid-js';
+import { useNavigate } from '@solidjs/router';
+import { Component, JSX, createEffect, createSignal } from 'solid-js';
 
 import { SubmitButton, ButtonStyles, LinkButton } from '$components/Button';
 import { Divider, FieldInputWidthMode, FieldLabelMode, Form, InputField } from '$components/Form';
@@ -28,34 +28,15 @@ import { getFormFields } from '$src/utils/formUtils';
  */
 const UserInfo: Component<RouteComponentProps> = () => {
 
-
-    const [ searchParams, _setSearchParams ] = useSearchParams();
-
     const { addLoadingPromise } = useLoadingState();
     const { setError } = useErrorState();
-    const { valid } = useSessionState();
+    const { valid, session } = useSessionState();
 
     const navigate = useNavigate();
 
     const [ submitting, setSubmitting ] = createSignal(false);
 
-    let session: string;
-
     const [ data, setData ] = createSignal({});
-
-    onMount(async () => {
-
-        // const sessionValid = await checkSessionState();
-        // if (!sessionValid) {
-
-        //     return;
-        
-        // }
-
-        
-
-
-    });
 
     createEffect(() => {
 
@@ -65,9 +46,7 @@ const UserInfo: Component<RouteComponentProps> = () => {
         
         }
 
-        session = searchParams[ 'session' ];
-
-        addLoadingPromise(getUserInfo({ session }), 'Getting info').then(result => {
+        addLoadingPromise(getUserInfo({ session: session() }), 'Getting info').then(result => {
 
             if (!result) {
 
@@ -100,7 +79,7 @@ const UserInfo: Component<RouteComponentProps> = () => {
         console.log('updating user info with', fields);
 
         // submit fields to update customer data
-        const result = await addLoadingPromise(updateUserInfo({ session }, fields), 'Submitting');
+        const result = await addLoadingPromise(updateUserInfo({ session: session() }, fields), 'Submitting');
 
         if (!result) {
 
@@ -112,13 +91,7 @@ const UserInfo: Component<RouteComponentProps> = () => {
 
         console.log('updated info');
 
-        // const customerInfo = Object.assign({ ...searchParams }, fields);
-
-        // console.log(customerInfo);
-
-        // navigate('/sign' + `?${new URLSearchParams(customerInfo)}`);
-
-        navigate('/sign' + `?${new URLSearchParams({ session })}`);
+        navigate('/sign' + `?${new URLSearchParams({ session: session() })}`);
     
     };
 
