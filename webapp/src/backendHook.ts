@@ -70,6 +70,7 @@ export async function checkSession(params: { session: string }) {
 
     try {
 
+        console.log('checking session', params[ 'session' ]);
         const response = await axios.get(createServerUrl('/check-session'), {
             params,
             headers: {
@@ -84,6 +85,7 @@ export async function checkSession(params: { session: string }) {
     
         }
 
+        console.log('session found and valid');
         return response.data;
 
     } catch (error) {
@@ -301,6 +303,45 @@ export async function getInvoice(params: {session: string}) {
     } catch (error) {
 
         console.error('getInvoice error', error);
+    
+    }
+
+}
+
+export async function sendInvoice(params: {session: string}, data: {email: string}) {
+
+    if (!params) {
+
+        console.warn('sendInvoice needs params!');
+        return;
+    
+    }
+
+    try {
+
+        const response = await axios.post(
+            createServerUrl('/send-invoice'),
+            data,
+            {
+                params,
+                headers: {
+                    'Content-Type': 'application/json',
+                    // 'Accept': 'image/jpeg'
+                }
+            }
+        );
+
+        if (response.status !== 200) {
+
+            throw new Error('bad status');
+        
+        }
+
+        return response.data;
+        
+    } catch (error) {
+
+        console.error('sendInvoice error', error);
     
     }
 
