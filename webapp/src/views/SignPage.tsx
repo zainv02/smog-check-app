@@ -1,8 +1,5 @@
-import { useNavigate, useSearchParams } from '@solidjs/router';
-// import base64 from 'base-64';
-// import PDFObject from 'pdfobject';
+import { useNavigate } from '@solidjs/router';
 import { Component, JSX, createSignal, onCleanup, onMount, For, createEffect } from 'solid-js';
-// import utf8 from 'utf8';
 
 import { Button, ButtonStyles, SubmitButton } from '$components/Button';
 import { Form } from '$components/Form';
@@ -23,15 +20,13 @@ const SignPage: Component = () => {
     const [ submitting, setSubmitting ] = createSignal(false);
     const [ signed, setSigned ] = createSignal(false);
     const [ canvasSize, setCanvasSize ] = createSignal<[number, number]>([ 0, 0 ]);
-    const [ searchParams ] = useSearchParams();
     const [ fees, setFees ] = createSignal<{label: string, amount: number}[]>([]);
     const [ estimate, setEstimate ] = createSignal<number>(0);
 
     const { addLoadingPromise }= useLoadingState();
     const { setError } = useErrorState();
-    const { valid } = useSessionState();
+    const { valid, session } = useSessionState();
     const navigate = useNavigate();
-    // const [ pdfSrc, setPdfSrc ] = createSignal('');
 
     let canvas: HTMLCanvasElement;
     let ctx: CanvasRenderingContext2D;
@@ -81,7 +76,7 @@ const SignPage: Component = () => {
         
         }
 
-        addLoadingPromise(getEstimate({ session: searchParams[ 'session' ] }), 'Getting estimate').then(result => {
+        addLoadingPromise(getEstimate({ session: session() }), 'Getting estimate').then(result => {
 
             if (!result) {
             
@@ -126,7 +121,6 @@ const SignPage: Component = () => {
 
         prevPos = e.pos;
         currentPoints = [ ...e.pos ];
-        ctx.fillRect(...e.pos, 3, 3);
         ctx.lineWidth = 1;
         setDrawing(true);
     
@@ -169,6 +163,15 @@ const SignPage: Component = () => {
         setDrawing(false);
         setSigned(true);
         lines.push(currentPoints);
+
+        if (currentPoints.length === 2) {
+
+            ctx.fillRect(currentPoints[ 0 ], currentPoints[ 1 ], 3, 3);
+        
+        }
+
+        // debug print the signature
+        // console.log(`[${lines.map(line => `[${line.join(',')}]`).join(',')}]`);
     
     };
 
@@ -202,19 +205,13 @@ const SignPage: Component = () => {
 
         console.log('using this data:', data);
 
-        const result = await addLoadingPromise(createInvoice({ session: searchParams[ 'session' ] }, data), 'Creating invoice');
+        const result = await addLoadingPromise(createInvoice({ session: session() }, data), 'Creating invoice');
 
         if (result) {
 
             console.log('success with result', result);
 
-            // const dataUrl = `data:application/pdf;filename=invoice.pdf;base64,${base64.encode(utf8.encode(result))}`;
-
-            // tested btoa(unescape(encodeURIComponent(result))) and it works, but unescape is deprecated, so trying to replace
-            // setPdfSrc(dataUrl);
-            // PDFObject.embed(dataUrl, '#pdfobject');
-
-            navigate('/invoice' + `?${new URLSearchParams({ session: searchParams[ 'session' ] })}`);
+            navigate('/invoice' + `?${new URLSearchParams({ session: session() })}`);
         
         } else {
 
