@@ -1,4 +1,4 @@
-import { Route, Routes, useSearchParams } from '@solidjs/router';
+import { Route, Routes } from '@solidjs/router';
 import { type Component } from 'solid-js';
 
 import { ErrorProvider } from './contexts/errorState';
@@ -14,16 +14,12 @@ import { Panel, Section } from '$components/Layout';
 
 const App: Component = () => {
 
-    const [ searchParams ] = useSearchParams();
-    
-    const session = searchParams[ 'session' ] as string;
-
     return (
         <Section class='h-screen max-h-screen bg-light-60 py-8'>
             <Panel class='relative h-fit max-h-full w-[768px] max-w-[768px] overflow-y-scroll'>
                 <ErrorProvider>
                     <LoadingStateProvider>
-                        <SessionStateProvider session={session} exclude={[ '/', '/plate-info' ]}>
+                        <SessionStateProvider exclude={[ '/', '/plate-info' ]}>
                             <Routes>
                                 <Route path='/' component={Home} />
                                 <Route path='/plate-info' component={LicensePlateInfo}/>
