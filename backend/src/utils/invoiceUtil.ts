@@ -3,7 +3,6 @@ import { jsPDF } from 'jspdf';
 import { Fee, UserVehicleInfo } from '../types';
 
 export interface InvoiceData extends UserVehicleInfo {
-    fees?: {label: string, amount: number}[]
 }
 
 export function calculateFees(data: {year: number | string}): Fee[] {
@@ -158,32 +157,89 @@ export function createInvoice(data: InvoiceData): jsPDF {
     
     }
 
+    // fees
+    const fees = data[ 'fees' ];
+    const feeTop = vinStartY + cellHeight + 20;
+    const feeFontSize = 16;
+    doc.setFontSize(feeFontSize);
+    const feeRowHeight = feeFontSize + 10;
+    
+    if (fees && fees.length > 0) {
+
+        for (let i = 0; i < fees.length; i++) {
+
+            const { label, amount } = fees[ i ];
+            doc.text(label, pagePadding, feeTop + i * feeRowHeight, { align: 'left', baseline: 'top' });
+            doc.setFont(doc.getFont().fontName, 'bold');
+            doc.text(`$${amount.toFixed(2).toString()}`, pageWidth - pagePadding, feeTop + i * feeRowHeight, { align: 'right', baseline: 'top' });
+            doc.setFont(doc.getFont().fontName, 'normal');
+
+        }
+        
+        const feeLineY = feeTop + fees.length * feeRowHeight + 10;
+        doc.line(pagePadding, feeLineY, pageWidth - pagePadding, feeLineY);
+
+        // fee total
+        let total = 0;
+        fees.forEach(({ amount }) => total += amount);
+
+        doc.text('TOTAL', pagePadding, feeLineY + 10, { align: 'left', baseline: 'top' });
+        doc.setFont(doc.getFont().fontName, 'bold');
+        doc.text(`$${total.toFixed(2).toString()}`, pageWidth - pagePadding, feeLineY + 10, { align: 'right', baseline: 'top' });
+        doc.setFont(doc.getFont().fontName, 'normal');
+    
+    }
+
+    
+
+
     // signature
+    doc.setFontSize(16);
     const signatureBottom = paddedPageHeight;
     const signatureLabelWidth = doc.getTextWidth('SIGNATURE');
-    const signatureStart = signatureLabelWidth + 20;
+    
     const signatureHeight = 90;
     const signatureScale = .6;
-    doc.line(...paddedPos(signatureStart, signatureBottom), ...paddedPos(paddedPageWidth, signatureBottom));
-
-    doc.setFontSize(16);
+    
+    // signature label
     doc.setFont(doc.getFont().fontName, 'bold');
     doc.text('SIGNATURE', ...paddedPos(0, signatureBottom));
     
-    doc.setFontSize(24);
-    doc.text('X', ...paddedPos(signatureLabelWidth, signatureBottom), { align: 'center' });
+    // signature X
+    doc.setFontSize(20);
+    const signatureMarkWidth = doc.getTextWidth('X');
+    doc.text('X', ...paddedPos(signatureLabelWidth + 5, signatureBottom), { align: 'left' });
 
+    const signatureStart = signatureLabelWidth + signatureMarkWidth + 10;
+    // signature line
+    doc.line(...paddedPos(signatureStart, signatureBottom), ...paddedPos(paddedPageWidth, signatureBottom));
 
+    const transformSignaturePos = (x: number, y: number) => {
+
+        return paddedPos(
+            x * signatureScale + signatureStart,
+            (y - signatureHeight) * signatureScale + signatureBottom + 10
+        );
+    
+    };
+
+    // signature stroke
     if (data[ 'signature' ] !== undefined) {
 
         for (const stroke of data[ 'signature' ]) {
         
+            if (stroke.length === 2) {
+
+                const pos = transformSignaturePos(stroke[ 0 ], stroke[ 1 ]);
+                doc.circle(...pos, 1, 'F');
+                continue;
+            
+            }
+
             for (let i = 0; i < stroke.length; i += 2) {
 
-                const pos = paddedPos(
-                    stroke[ i ] * signatureScale + signatureStart - 10,
-                    (stroke[ i + 1 ] - signatureHeight) * signatureScale + signatureBottom
-                );
+                const pos = transformSignaturePos(stroke[ i ], stroke[ i + 1 ]);
+
                 if (i === 0) {
 
                     doc.moveTo(...pos);
@@ -213,7 +269,7 @@ export function createInvoice(data: InvoiceData): jsPDF {
     const currencySymbolWidth = doc.getTextWidth('$');
     const estimateValueBottom = signatureBottom - estimateHeight * .2;
     doc.text('$', ...paddedPos(paddedPageWidth - estimateWidth, estimateValueBottom));
-    doc.setFont(doc.getFont().fontName);
+    doc.setFont(doc.getFont().fontName, 'normal');
     const parsedEstimate = Number.parseFloat(`${data[ 'estimate' ]}`);
     if (!isNaN(parsedEstimate)) {
 
@@ -241,6 +297,16 @@ export const EXAMPLE_INVOICE_DATA: InvoiceData = {
     'model':'Impreza',
     'plate':'6LEE230',
     'mileage':21,
-    'estimate': 200.23,
-    'signature': [ [ 44.046875,27.5,46.046875,35.5,47.046875,38.5,48.046875,43.5,49.046875,46.5,50.046875,51.5,52.046875,54.5,53.046875,57.5,55.046875,61.5 ],[ 26.046875,47.5,33.046875,40.5,36.046875,38.5,39.046875,36.5,43.046875,33.5,47.046875,31.5,52.046875,29.5,56.046875,27.5,61.046875,25.5,64.046875,23.5 ],[ 58.046875,46.5,68.046875,45.5,71.046875,44.5,74.046875,43.5,77.046875,41.5,80.046875,38.5,79.046875,35.5,76.046875,33.5,73.046875,32.5,69.046875,33.5,66.046875,36.5,64.046875,40.5,62.046875,43.5,62.046875,48.5,64.046875,51.5,68.046875,51.5,72.046875,50.5,76.046875,50.5,79.046875,49.5,82.046875,47.5,86.046875,44.5 ],[ 102.046875,26.5,93.046875,27.5,89.046875,28.5,85.046875,31.5,83.046875,34.5,87.046875,36.5,93.046875,36.5,99.046875,36.5,103.046875,36.5,104.046875,39.5,104.046875,43.5,101.046875,44.5,96.046875,46.5,93.046875,47.5,90.046875,48.5,86.046875,51.5 ],[ 118.046875,19.5,120.046875,28.5,121.046875,31.5,122.046875,35.5,125.046875,52.5 ],[ 110.046875,33.5,119.046875,30.5,122.046875,29.5,125.046875,28.5,128.046875,27.5,133.046875,24.5,137.046875,23.5 ] ]
+    'fees': [
+        {
+            'label': 'Smog inspection',
+            'amount': 141.75
+        },
+        {
+            'label': 'Smog certificate (this fee goes to the state of California)',
+            'amount': 8.25
+        }
+    ],
+    'estimate': 150,
+    'signature': [ [ 15,33.5,31,31.5,37,29.5,42,28.5,48,27.5,53,26.5,57,25.5,60,24.5 ],[ 42,29.5,42,39.5,42,44.5,42,49.5,41,52.5,41,56.5,42,60.5 ],[ 58,51.5,67,52.5,70,51.5,73,50.5,76,48.5,77,45.5,78,42.5,75,40.5,71,41.5,68,43.5,65,46.5,63,50.5,62,54.5,64,57.5,68,59.5,72,60.5,77,60.5,83,59.5 ],[ 108,39.5,99,38.5,96,39.5,93,40.5,90,43.5,89,46.5,91,49.5,94,50.5,98,52.5,101,53.5,105,54.5,100,56.5,97,57.5,94,58.5,91,59.5,85,61.5 ],[ 121,32.5,121,41.5,121,46.5,121,50.5,121,54.5,121,58.5 ],[ 113,48.5,122,46.5,125,45.5 ],[ 131,44.5,134,52.5,134,56.5 ],[ 139,37.5 ],[ 139,38 ],[ 155,39.5,156,48.5,156,52.5,155,55.5,154,50.5,155,46.5,157,42.5,161,37.5,166,32.5,169,30.5,173,27.5,176,28.5,177,31.5,179,35.5,180,39.5,181,42.5,181,46.5 ],[ 199,28.5,191,27.5,187,29.5,184,32.5,182,35.5,182,39.5,184,42.5,188,44.5,191,45.5,194,42.5,196,38.5,196,34.5,198,31.5,201,33.5,203,36.5,206,40.5,207,44.5,208,48.5,208,52.5,208,56.5,205,58.5,203,61.5,200,64.5,197,66.5,193,66.5,189,65.5,185,64.5,180,63.5,174,62.5,168,63.5,163,67.5,159,70.5 ],[ 230,35.5 ],[ 230,36 ],[ 245,35.5 ],[ 245,36 ],[ 219,55.5,225,61.5,229,63.5,233,63.5,239,62.5,242,60.5,246,58.5 ] ]
 };
