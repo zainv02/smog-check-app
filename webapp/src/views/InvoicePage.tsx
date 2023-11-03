@@ -4,9 +4,10 @@ import { Component, JSX, createEffect, createSignal } from 'solid-js';
 import { ButtonStyles, SubmitButton } from '$components/Button';
 import { Form, InputField } from '$components/Form';
 import { Title } from '$components/Header';
-import { getInvoice } from '$src/backendHook';
+import { getInvoice, sendInvoice } from '$src/backendHook';
 import { useLoadingState } from '$src/contexts/loadingState';
 import { useSessionState } from '$src/contexts/sessionState';
+import { getFormFields } from '$src/utils/formUtils';
 
 
 
@@ -16,7 +17,7 @@ const InvoicePage: Component = () => {
     const [ searchParams ] = useSearchParams();
     const [ invoiceImageDataUrl, setInvoiceImageDataUrl ] = createSignal(undefined);
     const { addLoadingPromise } = useLoadingState();
-    const { valid } = useSessionState();
+    const { valid, session } = useSessionState();
 
 
     createEffect(() => {
@@ -41,10 +42,29 @@ const InvoicePage: Component = () => {
     
     });
 
-    const handleSubmit: JSX.HTMLElementTags['form']['onSubmit'] = (e) => {
+    const handleSubmit: JSX.HTMLElementTags['form']['onSubmit'] = async (e) => {
 
         e.preventDefault();
 
+        const fields = getFormFields(e.currentTarget);
+
+        if (!fields[ 'email' ]) {
+
+            console.error('email is missing');
+            return;
+        
+        }
+
+        const result = await addLoadingPromise(sendInvoice({ session: session() }, { email: fields[ 'email' ] as string }));
+
+        if (!result) {
+
+            console.error('failed to send invoice');
+            return;
+        
+        }
+
+        console.log('invoice sent');
         
     };
 
