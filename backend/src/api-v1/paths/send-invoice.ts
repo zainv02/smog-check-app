@@ -5,16 +5,55 @@ import { UserSessionData } from '../../types';
 import nodemailer from 'nodemailer';
 import fs from 'node:fs';
 import cors from 'cors';
+import dotenv from 'dotenv';
 
-const transporter = nodemailer.createTransport({
-    host: 'mail.smtp2go.com',
-    port: 2525,
-    secure: false, // requires ssl or something, haven't figured it out, so only insecure works for now
-    auth: {
-        user: 'thedoc',
-        pass: '123'
+dotenv.config();
+
+const source = (() => {
+
+    if (!process.env.SMTP_SOURCE) {
+
+        console.error('send-invoice source error - missing environment variable SMTP_SOURCE');
+        return;
+    
     }
-});
+
+    return process.env.SMTP_SOURCE;
+
+})();
+
+const transporter = (() => {
+    
+    let missing = false;
+    for (const envVar of [ 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USERNAME', 'SMTP_PASSWORD' ]) {
+
+        if (!process.env[ envVar ]) {
+
+            missing = true;
+            console.error(`send-invoice transporter error - missing environment variable ${envVar}`);
+        
+        }
+    
+    }
+
+    if (missing) {
+
+        console.error('failed to create transporter for email');
+        return;
+    
+    }
+
+    return nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT!),
+        secure: false, // requires ssl or something, haven't figured it out, so only insecure works for now
+        auth: {
+            user: process.env.SMTP_USERNAME,
+            pass: process.env.SMTP_PASSWORD
+        }
+    });
+
+})();
 
 export const POST: Operation = [
     cors(),
@@ -22,6 +61,18 @@ export const POST: Operation = [
     async (req, res) => {
 
         try {
+
+            if (!transporter) {
+
+                throw new Error('email transporter was not initialized');
+            
+            }
+
+            if (!source) {
+
+                throw new Error('source was not initialized');
+            
+            }
 
             const session = res.locals.session as Session<UserSessionData>;
 
@@ -44,7 +95,7 @@ export const POST: Operation = [
             console.log(`sending invoice to ${recipientEmail}`);
 
             const result = await transporter.sendMail({
-                from: 'doctortest1337@gmail.com',
+                from: source,
                 to: recipientEmail,
                 subject: 'Your Invoice',
                 text: 'Thank you, attached is your invoice',
