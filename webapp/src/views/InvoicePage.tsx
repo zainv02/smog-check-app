@@ -1,7 +1,7 @@
-import { useSearchParams } from '@solidjs/router';
+import { useNavigate, useSearchParams } from '@solidjs/router';
 import { Component, JSX, createEffect, createSignal } from 'solid-js';
 
-import { ButtonStyles, SubmitButton } from '$components/Button';
+import { ButtonStyles, LinkButton, SubmitButton } from '$components/Button';
 import { Form, InputField } from '$components/Form';
 import { Title } from '$components/Header';
 import { getInvoice, sendInvoice } from '$src/backendHook';
@@ -18,6 +18,7 @@ const InvoicePage: Component = () => {
     const [ invoiceImageDataUrl, setInvoiceImageDataUrl ] = createSignal(undefined);
     const { addLoadingPromise } = useLoadingState();
     const { valid, session } = useSessionState();
+    const navigate = useNavigate();
 
 
     createEffect(() => {
@@ -55,7 +56,7 @@ const InvoicePage: Component = () => {
         
         }
 
-        const result = await addLoadingPromise(sendInvoice({ session: session() }, { email: fields[ 'email' ] as string }));
+        const result = await addLoadingPromise(sendInvoice({ session: session() }, { email: fields[ 'email' ] as string }), 'Sending Invoice');
 
         if (!result) {
 
@@ -65,6 +66,7 @@ const InvoicePage: Component = () => {
         }
 
         console.log('invoice sent');
+        navigate('/finish' + `?${new URLSearchParams({ session: session() })}`, { replace: true });
         
     };
 
@@ -83,6 +85,7 @@ const InvoicePage: Component = () => {
             <p class='mt-4'>Please enter your email to receive a digital copy</p>
             <Form onSubmit={handleSubmit}>
                 <div class='mt-4 flex flex-row items-center gap-4'>
+                    <LinkButton href={'/sign' + `?${new URLSearchParams({ session: session() })}`} replace={true}>Back</LinkButton>
                     <div class='w-[16rem]'>
                         <InputField name='email' type='email' placeholder='Email' required={true} />
                     </div>

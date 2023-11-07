@@ -14,7 +14,7 @@ const Home: Component = () => {
             <Title>Start Here</Title>
             <Button buttonStyle={ButtonStyles.PRIMARY} class='px-8 py-4 text-4xl' onClick={() => {
 
-                navigate('/plate-info');
+                navigate('/plate-info', { replace: true });
 
             }}>Start</Button>
         </>

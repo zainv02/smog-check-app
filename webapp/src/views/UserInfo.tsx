@@ -91,7 +91,7 @@ const UserInfo: Component<RouteComponentProps> = () => {
 
         console.log('updated info');
 
-        navigate('/sign' + `?${new URLSearchParams({ session: session() })}`);
+        navigate('/sign' + `?${new URLSearchParams({ session: session() })}`, { replace: true });
     
     };
 
@@ -130,7 +130,7 @@ const UserInfo: Component<RouteComponentProps> = () => {
                     </div>
                 </Columns>
                 <div class='flex flex-row items-center justify-between'>
-                    <LinkButton href='/plate-info' disabled={submitting()}>Back</LinkButton>
+                    <LinkButton href={'/plate-info'} replace={true}>Back</LinkButton>
                     <SubmitButton buttonStyle={ButtonStyles.PRIMARY} disabled={submitting()}>Confirm</SubmitButton>
                 </div>
             </Form>

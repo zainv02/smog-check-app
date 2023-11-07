@@ -77,7 +77,7 @@ export const SessionStateProvider: ParentComponent<{paramName?: string, exclude?
                     // window.location.href = new URL(window.location.host).toString();
                     // setSessionId(undefined);
                     
-                    navigate('/');
+                    navigate('/', { replace: true });
 
                 }}>Restart</Button>
             );

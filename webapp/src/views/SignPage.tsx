@@ -1,7 +1,7 @@
 import { useNavigate } from '@solidjs/router';
 import { Component, JSX, createSignal, onCleanup, onMount, For, createEffect } from 'solid-js';
 
-import { Button, ButtonStyles, SubmitButton } from '$components/Button';
+import { Button, ButtonStyles, LinkButton, SubmitButton } from '$components/Button';
 import { Form } from '$components/Form';
 import { Title } from '$components/Header';
 import { createInvoice, getEstimate } from '$src/backendHook';
@@ -211,7 +211,7 @@ const SignPage: Component = () => {
 
             console.log('success with result', result);
 
-            navigate('/invoice' + `?${new URLSearchParams({ session: session() })}`);
+            navigate('/invoice' + `?${new URLSearchParams({ session: session() })}`, { replace: true });
         
         } else {
 
@@ -279,11 +279,7 @@ const SignPage: Component = () => {
                     />
                 </div>
                 <div class='flex flex-row items-center justify-between'>
-                    <Button disabled={submitting()} onClick={e => {
-
-                        e.preventDefault(); history.back();
-
-                    }}>Back</Button>
+                    <LinkButton href={'/user-info' + `?${new URLSearchParams({ session: session() })}`} replace={true}>Back</LinkButton>
                     <Button disabled={submitting() || !signed()} onClick={e => {
 
                         e.preventDefault(); handleDrawClear();

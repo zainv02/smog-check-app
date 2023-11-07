@@ -44,7 +44,7 @@ const LicensePlateInfo: Component<RouteComponentProps> = () => {
             console.log('success with result', result);
             console.log('going to user-info page');
 
-            navigate('/user-info' + `?${new URLSearchParams({ session: result as string })}`);
+            navigate('/user-info' + `?${new URLSearchParams({ session: result as string })}`, { replace: true });
         
         } else {
 
@@ -78,13 +78,13 @@ const LicensePlateInfo: Component<RouteComponentProps> = () => {
                     autoCapitalize='characters'
                     pattern='^[A-Za-z0-9]{7}'
                     required={true}
-                    maxLength={7} 
+                    maxLength={7}
                 />
                 <SelectField name='state' label='State:' required={true} options={Object.entries(states)} emptyOption={true} />
                 {/* <InputField name='name' label='Name:' type='text' attr={{ required: true }} /> */}
 
                 <div class='flex w-full flex-row items-center justify-between'>
-                    <LinkButton href='/' disabled={submitting()}>Back</LinkButton>
+                    <LinkButton href='/' replace={true}>Back</LinkButton>
                     <SubmitButton buttonStyle={ButtonStyles.PRIMARY} disabled={submitting()}>Submit</SubmitButton>
                 </div>
             </Form>
