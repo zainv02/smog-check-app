@@ -1,7 +1,7 @@
 import { useNavigate } from '@solidjs/router';
 import { Component, JSX, createEffect, createSignal } from 'solid-js';
 
-import { SubmitButton, ButtonStyles, LinkButton } from '$components/Button';
+import { SubmitButton, ButtonStyles, LinkButton, Button } from '$components/Button';
 import { Divider, FieldInputWidthMode, FieldLabelMode, Form, InputField } from '$components/Form';
 import { Title } from '$components/Header';
 import { Columns } from '$components/Layout';
@@ -29,7 +29,7 @@ import { getFormFields } from '$src/utils/formUtils';
 const UserInfo: Component<RouteComponentProps> = () => {
 
     const { addLoadingPromise } = useLoadingState();
-    const { setError } = useErrorState();
+    const { setError, setChildren } = useErrorState();
     const { valid, session } = useSessionState();
 
     const navigate = useNavigate();
@@ -50,8 +50,13 @@ const UserInfo: Component<RouteComponentProps> = () => {
 
             if (!result) {
 
-                console.error('failed to get user info');
-                setError('Failed to get information. The session could have expired.');
+                console.error('failed to geut ser info');
+                setError('Failed to get information. The session could have expired, or there is a problem with the server.');
+                setChildren(<Button onClick={() => {
+
+                    navigate('/', { replace: true });
+
+                }}>Restart</Button>);
                 return;
             
             }
@@ -60,7 +65,7 @@ const UserInfo: Component<RouteComponentProps> = () => {
         
         });
     
-    });
+    }, undefined, { name: 'user-info-effect' });
 
     const handleSubmit: JSX.HTMLElementTags['form']['onSubmit'] = async (e) => {
 
