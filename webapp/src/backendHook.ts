@@ -346,3 +346,34 @@ export async function sendInvoice(params: {session: string}, data: {email: strin
     }
 
 }
+
+
+export async function getSources(): Promise<{ rows: object[]; }> {
+
+    try {
+
+        const response = await axios.get(
+            createServerUrl('/get-sources'),
+            {
+                headers: {
+                    // 'Content-Type': 'application/json',
+                    // 'Accept': 'image/jpeg'
+                }
+            }
+        );
+
+        if (response.status !== 200) {
+
+            throw new Error('bad status');
+        
+        }
+
+        return response.data;
+        
+    } catch (error) {
+
+        console.error('getSources error', error);
+    
+    }
+
+}
