@@ -3,9 +3,33 @@
 # if no tag is used, then it defaults to "latest"
 
 # derive image from an existing image, its easier
-FROM node:18
+# FROM node:18-apline (alpine is a light weight linux)
 
-WORKDIR /src
+# STAGE 1 - BUILD
+
+# here, we create an image for only the build step
+# a build step is optional, since we can just build and use
+# but it will make it so only the built files are on the final container, making for less space used
+FROM node:18-alpine AS build
+# build is the stage name ^ (will be used in the second stage --from)
+
+# label this intermediate image as a build image, that way it can be removed later with
+# docker image prune --filter label=stage=build
+LABEL stage=build
+
+# RUN apk --no-cache add --virtual .builds-deps build-base python3
+
+RUN apk add --no-cache \
+    build-base \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    giflib-dev
+
+# RUN apt-get install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
+WORKDIR /app
 
 # copy package.json (first arg) to workdir/package.json (second arg)
 # since workdir is /app, it will be ./package.json, so we don't need to put app/
@@ -16,10 +40,47 @@ COPY package.json package.json
 
 # installs all modules once the package.json is copied
 # if u want to ignore dev dependencies such as eslint or so, use the --omit=dev arg (npm) or --production arg (npm or bun)
-RUN npm install --omit=dev
+RUN npm install
 
 # copy source code (everything in the current dir) to workdir (/app)
-COPY . .
+# COPY . .
+# copy source files
+COPY src src
+# copy typescript config
+COPY tsconfig.json tsconfig.json
+
+# build the server
+RUN npm run compile
+
+# STAGE 2 - RUN
+
+FROM node:18-alpine
+# if the same image is used, you can stage from that image such as:
+# FROM build
+# this will inherit most settings from base image, such as the WORKDIR
+
+RUN apk add --no-cache \
+    build-base \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    giflib-dev
+
+# RUN apk --no-cache add --virtual .builds-deps build-base python3
+
+# RUN brew install pkg-config cairo pango libpng jpeg giflib librsvg pixman
+
+WORKDIR /app
+
+COPY package.json package.json
+# copy the dist directory from the build stage
+COPY --from=build /app/dist dist
+# copy standard fonts directory for pdfs
+COPY standard_fonts standard_fonts
+
+# install production dependencies only
+RUN npm install --omit=dev
 
 # exposes port 8080, or whichever port is used for the server
 # but ONLY exposes it for anything running inside the container that is run
@@ -41,7 +102,8 @@ EXPOSE 4000
 # but if args are specified in the command, then the CMD args are overwritten. for example:
 # docker run <container> node server.js   has arguments already in the command, so the CMD args in the dockerfile will not be used
 # MAYBE!!!!!! im not 100% sure  
-CMD [ "node", "index.js" ]
+# CMD [ "node", "index.js" ]
+CMD [ "npm", "start" ]
 
 # NOTE: using CTRL+C will not stop the docker container if run attached to the terminal
 # so it might be better to start it detached with --detach or -d argument:
@@ -63,3 +125,6 @@ CMD [ "node", "index.js" ]
 # this creates a bash terminal for use and uses the terminal u used as the proxy, like SSH
 # -it stands for --interactive and --tty args. im not sure what they do really yet
 # https://stackoverflow.com/questions/59965032/docker-run-with-interactive-and-tty-flag
+
+# building and running
+# https://wkrzywiec.medium.com/how-to-run-database-backend-and-frontend-in-a-single-click-with-docker-compose-4bcda66f6de
