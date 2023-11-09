@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from '@solidjs/router';
+import { useNavigate } from '@solidjs/router';
 import { Component, JSX, createEffect, createSignal } from 'solid-js';
 
 import { ButtonStyles, LinkButton, SubmitButton } from '$components/Button';
@@ -14,7 +14,6 @@ import { getFormFields } from '$src/utils/formUtils';
 
 const InvoicePage: Component = () => {
 
-    const [ searchParams ] = useSearchParams();
     const [ invoiceImageDataUrl, setInvoiceImageDataUrl ] = createSignal(undefined);
     const { addLoadingPromise } = useLoadingState();
     const { valid, session } = useSessionState();
@@ -29,7 +28,7 @@ const InvoicePage: Component = () => {
         
         }
 
-        addLoadingPromise(getInvoice({ session: searchParams[ 'session' ] })).then(result => {
+        addLoadingPromise(getInvoice({ session: session() })).then(result => {
 
             if (!result) {
 
