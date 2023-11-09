@@ -74,9 +74,6 @@ export const SessionStateProvider: ParentComponent<{paramName?: string, exclude?
             setChildren(
                 <Button onClick={() => {
 
-                    // window.location.href = new URL(window.location.host).toString();
-                    // setSessionId(undefined);
-                    
                     navigate('/', { replace: true });
 
                 }}>Restart</Button>
