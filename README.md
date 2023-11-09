@@ -47,12 +47,24 @@
 
 - If the web app is running, it will be running on the local host address with the given port, for example `3000`
 - To connect to it, go to http://localhost:3000 or http://127.0.0.1:3000
+- To connect from a different device, you will have to get the [IP of this machine](https://whatismyipaddress.com/) as the host address
+- Services like [ngrok](https://ngrok.com/) can be used to create public IP portals
 
-## [Shutting Down](#shutting-down)
+## [Service Management](#service-management)
+
+### [Useful Commands](#useful-commands)
+
+- To view all containers, running or not, run `docker container ls -a`
+- To check the logs of a container, run `docker logs <container>`
+    - Ex: `docker logs smog-api`, `docker logs smog-db`
+- To view all docker images installed, run `docker image ls`
+- To view all volumes, run `docker volume ls`
+
+### [Shutting Down](#shutting-down)
 
 - To stop all services, run the command `docker compose down`
 
-## [Starting Up in the Future](#starting-up-in-the-future)
+### [Starting Up in the Future](#starting-up-in-the-future)
 
 - To start all services again, run the command `docker compose up -d` to run detached or `docker compose up`
 
