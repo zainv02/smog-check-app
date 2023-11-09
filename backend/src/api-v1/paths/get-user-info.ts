@@ -111,7 +111,8 @@ export const GET: Operation = [
                 
                 }
         
-                if (databaseVehicleResult.rowCount > 0) {
+                // using result.rowCount seems to have a "possibly null" error on compile in docker
+                if (databaseVehicleResult.rows.length > 0) {
         
                     const databaseCustomerResult = await query({
                         text: 'SELECT * FROM "Customer" WHERE "CustID" = $1',
@@ -125,7 +126,7 @@ export const GET: Operation = [
                     }
     
                     // if row is found, then it is a old user
-                    if (databaseCustomerResult.rowCount > 0) {
+                    if (databaseCustomerResult.rows.length > 0) {
     
                         session.data.userState = 'old';
                         const customerData = databaseCustomerResult.rows[ 0 ];
