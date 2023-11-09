@@ -12,6 +12,12 @@ import { useSessionState } from '$src/contexts/sessionState';
 import { RouteComponentProps } from '$src/types';
 import { getFormFields } from '$src/utils/formUtils';
 
+// https://stackoverflow.com/questions/10830357/javascript-toisostring-ignores-timezone-offset
+function getLocalISOString() {
+    const tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+    const localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, 10);
+    return localISOTime;
+}
 
 /**
  * name     date
@@ -107,7 +113,7 @@ const UserInfo: Component<RouteComponentProps> = () => {
             <Form onSubmit={handleSubmit}>
                 <Columns>
                     <InputField name='name' label='Name:' labelMode={FieldLabelMode.TOP} type='text' value={data()[ 'name' ]} required={true} />
-                    <InputField name='date' label='Date:' labelMode={FieldLabelMode.TOP} type='date' value={new Date().toISOString().slice(0, 10)} required={true} />
+                    <InputField name='date' label='Date:' labelMode={FieldLabelMode.TOP} type='date' value={getLocalISOString()} required={true} />
                     <InputField name='phone' label='Phone:' labelMode={FieldLabelMode.TOP} type='tel' value={data()[ 'phone' ]} required={true} />
                 </Columns>
                 <Columns>
