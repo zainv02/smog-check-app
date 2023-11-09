@@ -37,7 +37,7 @@ export const ErrorProvider: ParentComponent = (props) => {
             {props.children}
             <Show when={errorMessage() !== undefined && errorMessage().length > 0}>
                 <div class='absolute left-0 top-0 flex h-full w-full flex-col items-center justify-center bg-white'>
-                    <p class='text-red-500'>{errorMessage()}</p>
+                    <p class='p-4 text-center text-red-500'>{errorMessage()}</p>
                     {children()}
                 </div>
             </Show>
