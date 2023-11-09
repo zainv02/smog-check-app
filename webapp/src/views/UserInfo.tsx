@@ -1,11 +1,11 @@
 import { useNavigate } from '@solidjs/router';
-import { Component, JSX, createEffect, createSignal } from 'solid-js';
+import { Component, JSX, createEffect, createSignal, onMount } from 'solid-js';
 
 import { SubmitButton, ButtonStyles, LinkButton, Button } from '$components/Button';
-import { Divider, FieldInputWidthMode, FieldLabelMode, Form, InputField } from '$components/Form';
+import { Divider, FieldLabelMode, Form, InputField, SelectField } from '$components/Form';
 import { Title } from '$components/Header';
 import { Columns } from '$components/Layout';
-import { getUserInfo, updateUserInfo } from '$src/backendHook';
+import { getSources, getUserInfo, updateUserInfo } from '$src/backendHook';
 import { useErrorState } from '$src/contexts/errorState';
 import { useLoadingState } from '$src/contexts/loadingState';
 import { useSessionState } from '$src/contexts/sessionState';
@@ -14,9 +14,11 @@ import { getFormFields } from '$src/utils/formUtils';
 
 // https://stackoverflow.com/questions/10830357/javascript-toisostring-ignores-timezone-offset
 function getLocalISOString() {
+
     const tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
     const localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, 10);
     return localISOTime;
+
 }
 
 /**
@@ -44,6 +46,24 @@ const UserInfo: Component<RouteComponentProps> = () => {
 
     const [ data, setData ] = createSignal({});
 
+    const [ sources, setSources ] = createSignal<[JSX.HTMLElementTags['option']['value'], string][]>([]);
+
+    onMount(() => {
+
+        addLoadingPromise(getSources(), 'Getting sources').then(result => {
+
+            if (!result) {
+
+                return;
+            
+            }
+
+            setSources(result.rows.filter(row => row[ 'Status' ]).map(row => [ row[ 'SourceID' ], row[ 'Description' ] ] as [string, string]));
+        
+        });
+    
+    });
+
     createEffect(() => {
 
         if (!valid()) {
@@ -56,7 +76,7 @@ const UserInfo: Component<RouteComponentProps> = () => {
 
             if (!result) {
 
-                console.error('failed to geut ser info');
+                console.error('failed to get user info');
                 setError('Failed to get information. The session could have expired, or there is a problem with the server.');
                 setChildren(<Button onClick={() => {
 
@@ -120,7 +140,8 @@ const UserInfo: Component<RouteComponentProps> = () => {
                     <InputField name='address' label='Address:' labelMode={FieldLabelMode.TOP} type='text' value={data()[ 'address' ]} required={true} />
                     <InputField name='city' label='City:' labelMode={FieldLabelMode.TOP} type='text' value={data()[ 'city' ]} required={true} />
                 </Columns>
-                <InputField name='source' label='Source:' inputWidthMode={FieldInputWidthMode.FILL} type='text' value={data()[ 'source' ]} required={false} />
+                {/* <InputField name='source' label='Source:' inputWidthMode={FieldInputWidthMode.FILL} type='text' value={data()[ 'source' ]} required={false} /> */}
+                <SelectField name='source' label='Source:' options={sources()} value={data()[ 'source' ]} />
                 <Divider />
                 <Title>Vehicle Info</Title>
                 <Columns class='[&>*>label]:text-sm'>
