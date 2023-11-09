@@ -139,7 +139,7 @@ export const GET: Operation = [
                             address: customerData[ 'Address1' ],
                             city: customerData[ 'City' ],
                             phone: customerData[ 'WorkPhone' ] || customerData[ 'HomePhone' ],
-                            source: '', // need to add a source column to the customer database
+                            source: customerData[ 'Source' ]
                         });
             
                     } else {
