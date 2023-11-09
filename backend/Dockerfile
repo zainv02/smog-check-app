@@ -10,7 +10,7 @@
 # here, we create an image for only the build step
 # a build step is optional, since we can just build and use
 # but it will make it so only the built files are on the final container, making for less space used
-FROM node:18-alpine AS build
+FROM node:20-alpine AS build
 # build is the stage name ^ (will be used in the second stage --from)
 
 # label this intermediate image as a build image, that way it can be removed later with
@@ -54,7 +54,7 @@ RUN npm run compile
 
 # STAGE 2 - RUN
 
-FROM node:18-alpine
+FROM node:20-alpine
 # if the same image is used, you can stage from that image such as:
 # FROM build
 # this will inherit most settings from base image, such as the WORKDIR
