@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start-db": "bash scripts/start-db.sh",
+    "stop-db": "bash scripts/stop-db.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
