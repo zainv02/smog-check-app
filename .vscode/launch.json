@@ -10,7 +10,7 @@
             "type": "node",
             "preLaunchTask": "compile-server",
             "outputCapture": "console",
-            "envFile": "${workspaceFolder}/backend/.env"
+            "envFile": "${workspaceFolder}/.env"
         },
     ]
 }
