@@ -1,15 +1,16 @@
 import pg, { QueryConfig } from 'pg';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const { Pool } = pg;
 
+const connectionString = `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB_NAME}`;
+
+console.log('DATABSE CONNECTION STRING:', connectionString);
+
 export const pool = new Pool({
-    connectionString: `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB_NAME}`,
+    connectionString: connectionString,
 });
 
-export async function query(queryConfig: QueryConfig) {
+export async function query(queryConfig: QueryConfig): Promise<pg.QueryResult | undefined> {
     
     try {
 

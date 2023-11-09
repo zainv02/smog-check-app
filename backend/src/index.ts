@@ -15,7 +15,11 @@ import fs from 'node:fs';
 
 // quick testing: curl -X POST http://localhost:4000/api/vehicle-info -H 'Content-Type: application/json' -d '{ "plate": "6LEE230", "state": "ca" }'
 
-dotenv.config();
+// const envPath = path.resolve(process.cwd(), '../.env');
+const envPath = path.resolve(__dirname, '../../.env');
+console.log('ENV resolved path:', envPath);
+const dotenvResult = dotenv.config({ path: envPath });
+console.log('dotenv config result:', dotenvResult);
 
 const SESSIONS_SAVE_DIR = '../temp';
 
@@ -24,7 +28,7 @@ const SESSIONS_SAVE_DIR = '../temp';
  */
 let server: http.Server;
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.API_PORT || 4000;
 
 app.use(express.json());
 

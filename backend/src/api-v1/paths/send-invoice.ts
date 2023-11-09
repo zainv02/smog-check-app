@@ -5,9 +5,6 @@ import { UserSessionData } from '../../types';
 import nodemailer from 'nodemailer';
 import fs from 'node:fs';
 import cors from 'cors';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const source = (() => {
 

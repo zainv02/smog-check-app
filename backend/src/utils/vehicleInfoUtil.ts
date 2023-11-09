@@ -1,9 +1,6 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
 
-dotenv.config();
-
-const authToken = process.env.PLATE_TO_VIN_API_TOKEN
+const authToken = process.env.PLATE_TO_VIN_API_TOKEN;
 
 export async function getVinData(plate: string, state: string) {
 
