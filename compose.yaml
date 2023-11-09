@@ -1,0 +1,35 @@
+services:
+
+  smog-db:
+    image: postgres
+    container_name: smog-db
+    # restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  smog-api:
+    build: ./backend
+    container_name: smog-api
+    env_file:
+      - .env # root env file containing postgres info
+    environment:
+      POSTGRES_HOST: smog-db
+      POSTGRES_PORT: 5432
+    ports:
+      - ${API_PORT}:${API_PORT}
+    links:
+      - smog-db # dependency on smog-db service
+    volumes:
+      - ./temp:/app/temp # maps host directory to the temp file from the api
+
+volumes:
+  pgdata:
+    name: "smog-data"
+    external: true
+
+  
