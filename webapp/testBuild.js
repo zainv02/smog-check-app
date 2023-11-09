@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 // eslint-disable-next-line no-undef
-const fs = require('node:fs');
+// const fs = require('node:fs');
+import fs from 'node:fs';
 // eslint-disable-next-line no-undef
-const http = require('node:http');
+// const http = require('node:http');
+import http from 'node:http';
 // eslint-disable-next-line no-undef
-const path = require('node:path');
+// const path = require('node:path');
+import path from 'node:path';
 
 const PORT = 8000;
 
