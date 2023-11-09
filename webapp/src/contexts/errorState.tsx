@@ -12,8 +12,22 @@ export type ErrorStateContext = {
     clearError: () => void
 };
 
+let createCount = 0;
+
+let created = false;
 
 export const ErrorProvider: ParentComponent = (props) => {
+
+    if (created) {
+
+        // eslint-disable-next-line solid/components-return-once
+        return;
+    
+    }
+
+    created = true;
+
+    console.log('ERROR STATE PROVIDER! COMPONENT LEVEL', ++createCount);
 
     const [ errorMessage, setErrorMessage ] = createSignal<string>('');
     const [ children, setChildren ] = createSignal<JSXElement>(undefined);

@@ -5,25 +5,36 @@ import { LoadingDisplay } from '$components/LoadingDisplay';
 
 const LoadingContext = createContext();
 
-export type AddLoadingStateFunction = (promise: Promise<unknown>, message?: string) => typeof promise;
-
-export type LoadingStateContext = {
-    loading: Accessor<boolean>,
-    setLoading: Setter<boolean>,
-    message: Accessor<string>,
-    setMessage: Setter<string>,
-    addLoadingPromise: AddLoadingStateFunction,
+export interface LoadingStateContext {
+    loading: Accessor<boolean>
+    setLoading: Setter<boolean>
+    message: Accessor<string>
+    setMessage: Setter<string>
+    addLoadingPromise: <TResult>(promise: Promise<TResult>, message?: string) => Promise<TResult>
     promiseCount: Accessor<number>
 }
 
+let created = false;
+
 export const LoadingStateProvider: ParentComponent = (props) => {
+
+    if (created) {
+
+        // eslint-disable-next-line solid/components-return-once
+        return;
+    
+    }
+
+    created = true;
+
+    console.log('LOADING STATE PROVIDER! COMPONENT LEVEL');
 
     const [ promiseCount, setPromiseCount ] = createSignal<number>(0);
     const [ loading, setLoading ] = createSignal<boolean>(false);
     const [ message, setMessage ] = createSignal(undefined);
     const loadingPromises: Map<string, {promise: Promise<unknown>, message?: string}> = new Map();
 
-    const addLoadingPromise: AddLoadingStateFunction = (promise, message?) => {
+    const addLoadingPromise: LoadingStateContext['addLoadingPromise'] = (promise, message?) => {
 
         const key = crypto.randomUUID();
 

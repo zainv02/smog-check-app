@@ -7,7 +7,7 @@ import { useLoadingState } from './loadingState';
 import { Button } from '$components/Button';
 import { checkSession } from '$src/backendHook';
 
-
+console.log('SESSION STATE PROVIDER! TOP LEVEL');
 
 const SessionContext = createContext();
 
@@ -20,8 +20,21 @@ export type SessionStateContext = {
     session: Accessor<string>
 };
 
+let created = false;
+
 export const SessionStateProvider: ParentComponent<{paramName?: string, exclude?: string[]}> = (props) => {
     
+    if (created) {
+
+        // eslint-disable-next-line solid/components-return-once
+        return;
+    
+    }
+
+    created = true;
+
+    console.log('SESSION STATE PROVIDER! COMPONENT LEVEL');
+
     let checked: boolean = false;
     let _checking: boolean = false;
     const [ checking, setChecking ] = createSignal<boolean>(false);
@@ -42,6 +55,8 @@ export const SessionStateProvider: ParentComponent<{paramName?: string, exclude?
     };
 
     const checkSessionState: CheckSessionStateFunction = async (opts) => {
+
+        console.log('function CHECKSESSIONSTATE being called');
 
         // eslint-disable-next-line solid/reactivity
         if (checked && !opts?.forceCheck) {
@@ -106,9 +121,9 @@ export const SessionStateProvider: ParentComponent<{paramName?: string, exclude?
         reset();
         setSessionId(searchParams[ paramName ]);
     
-    });
+        // });
 
-    createEffect(() => {
+        // createEffect(() => {
 
         console.log('sessionState props', props);
         console.log('current path', location.pathname);
@@ -121,8 +136,8 @@ export const SessionStateProvider: ParentComponent<{paramName?: string, exclude?
         
         }
 
-        const paramName = props.paramName || 'session';
-        const [ searchParams ] = useSearchParams();
+        // const paramName = props.paramName || 'session';
+        // const [ searchParams ] = useSearchParams();
 
         console.log('about to check session state', searchParams[ paramName ]);
 
