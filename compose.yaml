@@ -1,7 +1,7 @@
 services:
 
   smog-db:
-    image: postgres
+    image: postgres:16-alpine
     container_name: smog-db
     # restart: always
     environment:
