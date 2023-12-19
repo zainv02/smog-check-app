@@ -1,0 +1,358 @@
+SOURCE_DSN_PARAMS:
+  Driver: Microsoft Access Driver (*.mdb, *.accdb)
+  
+SOURCE_DATABASES:
+  # identifier for the database
+  autoshop:
+    # database settings and parameters
+    DSN_PARAMS:
+      DBQ: ./databases/AUTOSHOP.ACCDB
+  shopdata:
+    DSN_PARAMS:
+      DBQ: ./databases/SHOPDATA.ACCDB
+  mgmtdata:
+    DSN_PARAMS:
+      DBQ: ./databases/MGMTDATA.ACCDB
+  worders:
+    DSN_PARAMS:
+      DBQ: ./databases/W_ORDERS.ACCDB
+  
+SOURCES:
+- TABLE: autoshop.Sources
+  TARGET_TABLE: sources
+  COLUMNS:
+    SourceID: id
+    Description: description
+    Status: status
+  
+- TABLE: shopdata.Tasks
+  TARGET_TABLE: task_types
+  COLUMNS:
+    TaskID: id
+    TaskDescription: description
+    TaskApplicability: applicability
+    ServiceNo: service_no
+    DetailedDesc: detailed_desc
+    EstHours: est_hours
+    Rate: rate
+    LaborTaxable: labor_taxable
+    PartGroup: part_group
+    FlatRate: flat_rate
+    VendID: vend_id
+    Specific: specific
+    LinkID: link_id
+    rAmt: r_amt
+    wAmt: w_amt
+    cAmt: c_amt
+    sAmt: s_amt
+    PriceLock: price_lock
+    Kiosk: kiosk
+    OrderInfo: order_info
+  
+- TABLE: autoshop.Customer
+  TARGET_TABLE: customers
+  COLUMNS:
+    CustID: old_id
+    Name: name
+    Address1: address_1
+    Address2: address_2
+    City: city
+    State: state
+    ZipCode: zip
+    Source: source_id
+    WorkPhone: phone
+    LastIn: last_visit
+    DollarsSpent: dollars_spent
+    Visits: visits
+  
+- TABLE: autoshop.Automobile
+  TARGET_TABLE: automobiles
+  COLUMNS:
+    AutoID: old_id
+    AutoVIN: vin
+    AutoMake: make
+    AutoModel: model
+    AutoYear: year
+    AutoLicPlate: plate
+    State: state
+    AutoMileage: mileage
+    Notes: notes
+    CustID: customer_id WITH customers.id FROM ROW(customers.old_id, @value)
+  
+- TABLE: autoshop.Employees
+  TARGET_TABLE: employees
+  COLUMNS:
+    IDNumber: id_num
+    Name: name
+    Address1: address_1
+    Address2: address_2
+    City: city
+    State: state
+    ZipCode: zip
+    HomePhone: phone
+    NickName: nick_name
+    StartDate: start_date
+    JobClass: job_class
+    PayType: pay_type
+    PayRate: pay_rate
+    Password: password
+  
+- TABLE: autoshop.History
+  TARGET_TABLE: history
+  COLUMNS:
+    AutoID: auto_id WITH automobiles.id FROM ROW(automobiles.old_id, @value)
+    LastDate: last_date
+    LastMileage: last_mileage
+    DueDate: due_date
+    DueMileage: due_mileage
+  
+- TABLE: mgmtdata.Orders
+  TARGET_TABLE: orders
+  COLUMNS:
+    OrderNumber: old_num
+    ODate: date
+    Desc: description
+    CustID: customer_id WITH customers.id FROM ROW(customers.old_id, @value)
+    AutoID: auto_id WITH automobiles.id FROM ROW(automobiles.old_id, @value)
+    EmplID: employee_id WITH employees.id_num FROM ROW(employees.id_num, @value)
+    Total: total
+    PTaxRate: p_tax_rate
+  
+- TABLE: worders.Orders
+  TARGET_TABLE: orders
+  COLUMNS:
+    OrderNumber: old_num
+    PaidDate: date
+    PromisedDate: promised_date
+    CompleteDate: completed_date
+    Recommendations: description
+    CustID: customer_id WITH customers.id FROM ROW(customers.old_id, @value)
+    AutoID: auto_id WITH automobiles.id FROM ROW(automobiles.old_id, @value)
+    Total: total
+    PartsTaxRate: p_tax_rate
+  
+- TABLE: mgmtdata.Payments
+  TARGET_TABLE: payments
+  COLUMNS:
+    WDate: date
+    PayDate: pay_date
+    OrderNumber: order_num WITH orders.num FROM ROW(order.old_num, @value)
+    CustID: customer_id WITH customers.id FROM ROW(customers.old_id, @value)
+    Amount: amount
+    Void: void
+    Paid: paid
+    Method: method
+    Reference: reference
+  
+- TABLE: worders.Payments
+  TARGET_TABLE: payments
+  COLUMNS:
+    PaymentDate: pay_date
+    OrderNumber: order_num WITH orders.num FROM ROW(order.old_num, @value)
+    PayAmount: amount
+    PayMethod: method
+    PayReference: reference
+  
+- TABLE: mgmtdata.Services
+  TARGET_TABLE: services
+  COLUMNS:
+    WDate: date
+    AutoID: auto_id WITH automobiles.id FROM ROW(automobiles.old_id, @value)
+    OrderNumber: order_num WITH orders.num FROM ROW(orders.old_num, @value)
+    ServiceMiles: service_miles
+    LaborCharge: labor_charge
+    LaborCost: labor_cost
+    PartsCharge: parts_charge
+    PartsCost: parts_cost
+    EmplID: employee_id WITH employees.id_num FROM ROW(employees.id_num, @value)
+    ActHours: act_hours
+    EstHours: est_hours
+    Description: description
+  
+- TABLE: worders.Tasks
+  TARGET_TABLE: tasks
+  COLUMNS:
+    OrderNumber: order_num WITH orders.num FROM ROW(orders.old_num, @value)
+    TaskID: task_id WITH task_types.id FROM ROW(task_types.id, @value)
+    TaskDescription: description
+    Status: status
+    ServiceNo: service_no
+    DetailedDesc: detailed_desc
+    EstHours: est_hours
+    ActHours: act_hours
+    Rate: rate
+    Tech: tech
+    LaborTaxable: labor_taxable
+    PartGroup: part_group
+    Warranty: warranty
+    WarrSuppID: warr_supp_id
+    Schedule: schedule
+    Source: source_id WITH sources.id FROM ROW(sources.id, @value)
+    Archive: archive
+    PriceLock: price_lock
+    SchTotal: sch_total
+    BayStatus: bay_status
+ 
+  
+TARGET_DSN_PARAMS:
+  Driver: PostgreSQL Unicode
+  Server: localhost
+  Port: ${POSTGRES_PORT}
+  Database: postgres
+  Uid: postgres
+  Pwd: ${POSTGRES_PASSWORD}
+ 
+  
+# items have to be unique
+# uniqueness is determined by the catalog.schema.table
+TARGETS:
+- TABLE: sources
+  COLUMNS:
+    id: text primary key
+    description: text
+    status: bool
+  
+- TABLE: task_types
+  COLUMNS:
+    id: int primary key
+    description: text
+    applicability: text
+    service_no: int
+    detailed_desc: text
+    est_hours: numeric
+    rate: money
+    labor_taxable: bool
+    part_group: text
+    flat_rate: money
+    vend_id: text
+    specific: bool
+    link_id: int
+    r_amt: money
+    w_amt: money
+    c_amt: money
+    s_amt: money
+    price_lock: text
+    kiosk: int
+    order_info: text
+  
+- TABLE: customers
+  COLUMNS:
+    id: serial primary key
+    old_id: text
+    name: text
+    address_1: text
+    address_2: text
+    city: text
+    state: text
+    zip: text
+    source_id: text references sources(id) on update cascade
+    phone: text
+    last_visit: date
+    dollars_spent: money
+    visits: int
+  
+- TABLE: automobiles
+  COLUMNS:
+    id: serial primary key
+    old_id: text
+    vin: text
+    make: text
+    model: text
+    year: text
+    plate: text
+    state: text
+    mileage: int
+    notes: text
+    customer_id: int references customers(id)
+  
+- TABLE: employees
+  COLUMNS:
+    id_num: text primary key
+    name: text
+    address_1: text
+    address_2: text
+    city: text
+    state: text
+    zip: text
+    phone: text
+    nick_name: text
+    start_date: date
+    job_class: text
+    pay_type: text
+    pay_rate: money
+    password: text
+  
+- TABLE: history
+  COLUMNS:
+    auto_id: int references automobiles(id) on update cascade
+    last_date: date
+    last_mileage: int
+    due_date: date
+    due_mileage: int
+  PRIMARY_KEYS:
+    auto_id: true
+  
+- TABLE: orders
+  COLUMNS:
+    num: serial primary key
+    old_num: text
+    date: date
+    promised_date: date
+    completed_date: date
+    description: text
+    customer_id: int references customers(id) on update cascade
+    auto_id: int references automobiles(id) on update cascade
+    employee_id: text references employees(id_num) on update cascade on delete set null
+    total: money
+    p_tax_rate: money
+  
+- TABLE: payments
+  COLUMNS:
+    id: serial primary key
+    date: date
+    pay_date: date
+    order_num: int references orders(num) on update cascade
+    customer_id: int references customers(id) on update cascade
+    amount: money
+    void: bool
+    paid: bool
+    method: int
+    reference: text
+  
+- TABLE: services
+  COLUMNS:
+    date: date
+    auto_id: int references automobiles(id) on update cascade
+    order_num: int references orders(num) on update cascade
+    service_miles: int
+    labor_charge: money
+    labor_cost: money
+    parts_charge: money
+    parts_cost: money
+    employee_id: text references employees(id_num) on update cascade on delete set null
+    act_hours: numeric
+    est_hours: numeric
+    description: text
+  
+- TABLE: tasks
+  COLUMNS:
+    order_num: int references orders(num) on update cascade
+    task_id: int references task_types(id) on update cascade on delete set null
+    description: text
+    status: text
+    service_no: int
+    detailed_desc: text
+    est_hours: numeric
+    act_hours: numeric
+    rate: money
+    tech: text
+    labor_taxable: bool
+    part_group: text
+    warranty: bool
+    warr_supp_id: text
+    schedule: date
+    source_id: text references sources(id) on update cascade on delete set null
+    archive: bool
+    price_lock: text
+    sch_total: money
+    bay_status: int
