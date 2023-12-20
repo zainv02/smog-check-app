@@ -110,6 +110,8 @@ export const POST: Operation = [
             
             }
 
+            console.log('sent invoice');
+
             res.status(200).send('success');
         
         } catch (error) {
