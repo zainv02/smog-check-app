@@ -1,8 +1,8 @@
-import express from 'express';
+import path from 'path';
 import dotenv from 'dotenv';
+import express from 'express';
 import { initialize } from 'express-openapi';
 import apiDoc from './api-v1/openapi';
-import path from 'path';
 import * as http from 'node:http';
 import { stop as stopDatabase } from './utils/databaseUtil';
 import { SessionManager } from './sessionManager';
