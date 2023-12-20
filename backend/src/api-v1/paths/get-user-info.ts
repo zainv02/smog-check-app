@@ -101,7 +101,7 @@ export const GET: Operation = [
             if (session.data.userState === undefined) {
 
                 const databaseVehicleResult = await query({
-                    text: 'SELECT "CustID" FROM "Automobile" WHERE "AutoVIN" = $1',
+                    text: 'SELECT "customer_id" FROM "automobiles" WHERE "vin" = $1',
                     values: [ vin ]
                 });
     
@@ -115,8 +115,8 @@ export const GET: Operation = [
                 if (databaseVehicleResult.rows.length > 0) {
         
                     const databaseCustomerResult = await query({
-                        text: 'SELECT * FROM "Customer" WHERE "CustID" = $1',
-                        values: [ databaseVehicleResult.rows[ 0 ][ 'CustID' ] ]
+                        text: 'SELECT * FROM "customers" WHERE "id" = $1',
+                        values: [ databaseVehicleResult.rows[ 0 ][ 'customer_id' ] ]
                     });
     
                     if (!databaseCustomerResult) {
@@ -134,12 +134,12 @@ export const GET: Operation = [
                         // console.log('customer result:', databaseCustomerResult.rows);
     
                         Object.assign(session.data, {
-                            id: customerData[ 'CustID' ],
-                            name: customerData[ 'Name' ],
-                            address: customerData[ 'Address1' ],
-                            city: customerData[ 'City' ],
-                            phone: customerData[ 'WorkPhone' ] || customerData[ 'HomePhone' ],
-                            source: customerData[ 'Source' ]
+                            id: customerData[ 'id' ],
+                            name: customerData[ 'name' ],
+                            address: customerData[ 'address_1' ],
+                            city: customerData[ 'city' ],
+                            phone: customerData[ 'phone' ],
+                            source: customerData[ 'source_id' ]
                         });
             
                     } else {

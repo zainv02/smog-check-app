@@ -9,7 +9,7 @@ export const GET: Operation = [
         try {
             
             const result = await query({
-                text: 'SELECT * FROM "Sources" WHERE true'
+                text: 'SELECT * FROM "sources"'
             });
 
             if (!result) {

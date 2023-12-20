@@ -58,7 +58,7 @@ const UserInfo: Component<RouteComponentProps> = () => {
             
             }
 
-            setSources(result.rows.filter(row => row[ 'Status' ]).map(row => [ row[ 'SourceID' ], row[ 'Description' ] ] as [string, string]));
+            setSources(result.rows.filter(row => row[ 'status' ]).map(row => [ row[ 'id' ], row[ 'description' ] ] as [string, string]));
         
         });
     
