@@ -1,25 +1,63 @@
-import pg, { QueryConfig } from 'pg';
+import pg, { QueryConfig, Pool } from 'pg';
 
-const { Pool } = pg;
+let pool: Pool | undefined = undefined;
 
-const connectionString = `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB_NAME}`;
+let lastConnectionString: string = '';
 
-console.log('DATABSE CONNECTION STRING:', connectionString);
+export async function refreshPool() {
 
-export const pool = new Pool({
-    connectionString: connectionString,
-});
+    const connectionString = `postgresql://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DB_NAME}`;
+    
+
+    if (!pool) {
+
+        console.log('DATABASE CONNECTION STRING:', connectionString);
+        lastConnectionString = connectionString;
+        pool = new Pool({
+            connectionString: connectionString,
+        });
+    
+    } else {
+
+        if (lastConnectionString != connectionString) {
+
+            console.log('DATABASE CONNECTION STRING:', connectionString);
+            lastConnectionString = connectionString;
+            await pool.end();
+            pool = new Pool({
+                connectionString: connectionString,
+            });
+        
+        }
+    
+    }
+
+    return pool;
+
+}
+
+export async function getClient(): Promise<pg.PoolClient> {
+
+    await refreshPool();
+
+    if (!pool) {
+
+        throw new Error('pg pool failed to connect');
+    
+    }
+
+    const client = await pool.connect();
+    return client;
+
+}
 
 export async function query(queryConfig: QueryConfig): Promise<pg.QueryResult | undefined> {
     
     try {
 
-        const client = await pool.connect();
-
+        const client = await getClient();
         const res = await client.query(queryConfig);
-
         client.release();
-
         return res;
     
     } catch (error) {
@@ -32,6 +70,11 @@ export async function query(queryConfig: QueryConfig): Promise<pg.QueryResult | 
 
 export async function stop() {
 
-    await pool.end();
+    if (pool) {
+
+        await pool.end();
+        pool = undefined;
+    
+    }
 
 }
